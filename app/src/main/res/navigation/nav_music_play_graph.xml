@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_music_play_graph"
+    app:startDestination="@id/musicPlayUIFragment">
+
+
+    <fragment
+        android:id="@+id/musicPlayUIFragment"
+        android:name="com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment"
+        android:label="music_play_ui_fragment"
+        tools:layout="@layout/music_play_ui_fragment" >
+        <action
+            android:id="@+id/action_musicPlayUIFragment_to_songItemFragment2"
+            app:destination="@id/songItemFragment2" />
+    </fragment>
+    <fragment
+        android:id="@+id/songItemFragment2"
+        android:name="com.msfakatsuki.musicplayer.ui.play.SongItemFragment"
+        android:label="fragment_item_list"
+        tools:layout="@layout/fragment_item_list" />
+</navigation>
