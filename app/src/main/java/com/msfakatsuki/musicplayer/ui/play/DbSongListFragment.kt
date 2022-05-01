@@ -1,25 +1,28 @@
 package com.msfakatsuki.musicplayer.ui.play
 
 import android.os.Bundle
-import android.support.v4.media.session.MediaSessionCompat
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import com.msfakatsuki.musicplayer.R
+import com.msfakatsuki.musicplayer.MusicApplication
+import com.msfakatsuki.musicplayer.databinding.FragmentDbsongListBinding
 
 /**
  * A fragment representing a list of Items.
  */
-class SongItemFragment : Fragment() {
+class DbSongListFragment : Fragment() {
 
-    private val viewModel: MusicPlayUIViewModel by activityViewModels()
     private var columnCount = 1
-    private val adapter = SongRecyclerViewAdapter()
+    private lateinit var binding : FragmentDbsongListBinding
+    private val adapter =  DbSongRecyclerViewAdapter()
+
+    private val listViewModel: DbSongListViewModel by activityViewModels {
+        DbSongListViewModelFactory((activity?.application as MusicApplication).repository)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,31 +36,21 @@ class SongItemFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_item_list, container, false)
-
+        binding = FragmentDbsongListBinding.inflate(inflater, container, false)
+        val view = binding.root
         // Set the adapter
-        if (view is RecyclerView) {
-            with(view) {
-                layoutManager = when {
-                    columnCount <= 1 -> LinearLayoutManager(context)
-                    else -> GridLayoutManager(context, columnCount)
-                }
-                adapter = this@SongItemFragment.adapter
+        with(view) {
+            layoutManager = when {
+                columnCount <= 1 -> LinearLayoutManager(context)
+                else -> GridLayoutManager(context, columnCount)
+            }
+            adapter = this@DbSongListFragment.adapter
+
+            listViewModel.songList.observe(viewLifecycleOwner) { itemList ->
+                itemList.let { this@DbSongListFragment.adapter.submitList(it) }
             }
         }
         return view
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        bindList(viewModel.SongPlayingList)
-    }
-
-    fun bindList(list: MutableList<MediaSessionCompat.QueueItem>?) {
-        list?.let{
-            adapter.submitList(it)
-        }
-
     }
 
     companion object {
@@ -68,12 +61,10 @@ class SongItemFragment : Fragment() {
         // TODO: Customize parameter initialization
         @JvmStatic
         fun newInstance(columnCount: Int) =
-            SongItemFragment().apply {
+            DbSongListFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_COLUMN_COUNT, columnCount)
                 }
             }
     }
-
-
 }

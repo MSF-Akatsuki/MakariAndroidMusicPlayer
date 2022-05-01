@@ -33,6 +33,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
     }
 
     private val MAK_MUSIC_EMPTY_ROOT_ID = "EMPTY"
+    private val MAK_MUSIC_PLAYLIST_ROOT_ID = "ROOT"
 
     private var mMediaPlayer: MediaPlayer?=null
     private var mpStatePrepare: Int = STATE_NEED_PREPARE
@@ -40,10 +41,11 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
     private var mediaSession: MediaSessionCompat?=null
     private lateinit var stateBuilder: PlaybackStateCompat.Builder
 
-    private val mSongPlayList = arrayListOf<MediaDescriptionCompat>()
-    private val shuffledIdList = arrayListOf<Int>()
+    private val lcg = LinearRandomGenerator()
+    private val mSongPlayList = arrayListOf<MediaSessionCompat.QueueItem>()
     private val playlistSize get() = mSongPlayList.size
-    private var songId = -1
+    private var songId : Int = -1
+    private var mediaId : Long = 0
     private var playBackType:Int = PLAYBACK_SEQUENCIAL
 
     override fun onCreate() {
@@ -88,15 +90,23 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         rootHints: Bundle?
     ): BrowserRoot? {
         Log.println(Log.INFO,"mpbService","onGetRoot")
-        return BrowserRoot(MAK_MUSIC_EMPTY_ROOT_ID,null)
+        if (clientPackageName == "com.msfakatsuki.musicplayer")
+            return BrowserRoot(MAK_MUSIC_PLAYLIST_ROOT_ID,null)
+        else
+            return BrowserRoot(MAK_MUSIC_EMPTY_ROOT_ID,null)
     }
 
     override fun onLoadChildren(
         parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
+
         Log.println(Log.INFO,"mpbService","onLoadChildren")
-        result.sendResult(null)
+
+        if (parentId==MAK_MUSIC_PLAYLIST_ROOT_ID)
+            result.sendResult(MediaBrowserCompat.MediaItem.fromMediaItemList(mSongPlayList))
+        else
+            result.sendResult(null)
         return
     }
     private lateinit var afChangeListener : AudioManager.OnAudioFocusChangeListener
@@ -128,8 +138,8 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                     }
                 }?: kotlin.run {
                     mMediaPlayer = createMediaPlayer()
-                    if (playlistSize > 0 && mSongPlayList[0].mediaUri != null) {
-                        mSongPlayList[0].mediaUri?.let {
+                    if (playlistSize > 0 ) {
+                        mSongPlayList[0].description.mediaUri?.let {
                             Log.println(Log.INFO,"mpbService","Set data source of mediaplayer")
                             mMediaPlayer!!.setDataSource(baseContext, it)
                             songId = 0
@@ -163,18 +173,18 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
         override fun onAddQueueItem(description: MediaDescriptionCompat?) {
             Log.println(Log.INFO,"mpbService","onAddQueueItem")
-            description?:run{
-                Log.println(Log.WARN,"mpbService", "MediaUri is null")
-                return
-            }
-            mSongPlayList.add(description)
-            shuffledIdList.add(playlistSize-1)
-            Log.println(Log.INFO,"mpbService","Nothing. playListSize is ${playlistSize}  ${mSongPlayList.size}")
+
+            description?:return
+
             if (playBackType== PLAYBACK_SHUFFLED) {
-                val realSongId = shuffledIdList[songId]
-                shuffledIdList.shuffle()
-                songId = shuffledIdList.indexOf(realSongId)
+                songId %= playlistSize
             }
+
+            mSongPlayList.add(MediaSessionCompat.QueueItem(description,mediaId++) )
+            mediaSession?.setQueue(mSongPlayList)
+            mediaSession?.setPlaybackState(stateBuilder.setState(0,13, 1.0F).build())
+            Log.println(Log.INFO,"mpbService","Nothing. playListSize is ${playlistSize}  ${mSongPlayList.size}")
+
             super.onAddQueueItem(description)
         }
 
@@ -224,43 +234,48 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             if (!isForced && playBackType == PLAYBACK_SEQUENCIAL) {
                 if (songId + 1 < playlistSize) {
                     /*Todo: Figure out how to avoid !! cast*/
-                    it.setDataSource(this,mSongPlayList[songId + 1].mediaUri!!)
+                    it.setDataSource(this,mSongPlayList[songId + 1].description.mediaUri!!)
                     it.prepareAsync()
                     songId += 1
                 } else {
-                    it.setDataSource(this,mSongPlayList[0].mediaUri!!)
+                    it.setDataSource(this,mSongPlayList[0].description.mediaUri!!)
                     songId = 0
                 }
             } else if ((isForced && playBackType == PLAYBACK_SEQUENCIAL) || playBackType == PLAYBACK_SEQUENCIAL_LOOP) {
                 if (songId + 1 < playlistSize) {
-                    it.setDataSource(this,mSongPlayList[songId + 1].mediaUri!!)
+                    it.setDataSource(this,mSongPlayList[songId + 1].description.mediaUri!!)
                     it.prepareAsync()
                     songId += 1
                 } else {
-                    it.setDataSource(this,mSongPlayList[0].mediaUri!!)
+                    it.setDataSource(this,mSongPlayList[0].description.mediaUri!!)
                     it.prepareAsync()
                     songId = 0
                 }
             } else if (playBackType == PLAYBACK_SHUFFLED) {
-                if (songId + 1 < playlistSize) {
-                    it.setDataSource(this,mSongPlayList[shuffledIdList[songId + 1]].mediaUri!!)
-                    it.prepareAsync()
-                    songId += 1
-                } else {
-                    it.setDataSource(this,mSongPlayList[shuffledIdList[0]].mediaUri!!)
-                    it.prepareAsync()
-                    songId = 0
-                }
+                songId = lcg.next(songId)
+                it.setDataSource(this,mSongPlayList[songId%playlistSize].description.mediaUri!!)
+                it.prepareAsync()
             } else if (!isForced && playBackType == PLAYBACK_SINGLE_LOOP) {
                 it.start()
             }
         }
     }
 
-    class MakSongData(
+    data class MakSongData(
         public val path: String,
         public val title: String?,
         public val artist: String?,
         public val album: String?
     )
+
+    class LinearRandomGenerator(
+        private val modulo:Long=2147483647,
+        private val a : Long = 16807,
+        private val aRev : Long = 1407677000,
+        private val c : Long = 0
+    ) {
+        
+        fun next(v : Int) = ((a*v+c)%modulo).toInt()
+        fun prior(v : Int)=((v-c)*aRev%modulo).toInt()
+    }
 }

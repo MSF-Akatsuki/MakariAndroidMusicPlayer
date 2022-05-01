@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_music_play_graph"
-    app:startDestination="@id/musicPlayUIFragment">
+    app:startDestination="@id/musicSelectFragment">
 
 
     <fragment
@@ -20,4 +20,13 @@
         android:name="com.msfakatsuki.musicplayer.ui.play.SongItemFragment"
         android:label="fragment_item_list"
         tools:layout="@layout/fragment_item_list" />
+    <fragment
+        android:id="@+id/musicSelectFragment"
+        android:name="com.msfakatsuki.musicplayer.ui.play.MusicSelectFragment"
+        android:label="fragment_music_select"
+        tools:layout="@layout/fragment_dbsong_list" >
+        <action
+            android:id="@+id/action_musicSelectFragment_to_musicPlayUIFragment"
+            app:destination="@id/musicPlayUIFragment" />
+    </fragment>
 </navigation>

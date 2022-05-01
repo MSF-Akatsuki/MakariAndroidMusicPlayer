@@ -9,12 +9,15 @@ import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.navigation.fragment.NavHostFragment
 import com.msfakatsuki.musicplayer.databinding.MusicPlayUiActivityBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
+import com.msfakatsuki.musicplayer.ui.play.SongItemFragment
 
 class MusicPlayUIActivity : AppCompatActivity() {
 
@@ -46,7 +49,6 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
         mediaBrowser.connect()
 
-        //mediaBrowser.subscribe(mediaBrowser.root,subscriptionCallback)
     }
 
     override fun onStart() {
@@ -62,11 +64,13 @@ class MusicPlayUIActivity : AppCompatActivity() {
     override fun onStop() {
 
         super.onStop()
-        MediaControllerCompat.getMediaController(this)?.unregisterCallback(controllerCallbacks)
     }
 
     override fun onDestroy() {
+        Log.println(Log.INFO,"mpuia","onDestroy" +
+                "")
         mediaBrowser.disconnect()
+        MediaControllerCompat.getMediaController(this)?.unregisterCallback(controllerCallbacks)
         super.onDestroy()
     }
 
@@ -78,12 +82,12 @@ class MusicPlayUIActivity : AppCompatActivity() {
                     this@MusicPlayUIActivity,
                     token
                 )
+                mediaController.registerCallback(controllerCallbacks)
                 MediaControllerCompat.setMediaController(this@MusicPlayUIActivity,mediaController)
             }
 
             viewModel.isServiceConnected.value = true
-            buildTransportControls()
-
+            mediaBrowser.subscribe(mediaBrowser.root,subscriptionCallback)
             super.onConnected()
         }
 
@@ -99,18 +103,30 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
     private fun buildTransportControls() {
         val mediaController = MediaControllerCompat.getMediaController(this)
-        // TODO("Not yet implemented")
 
-        mediaController.registerCallback(controllerCallbacks)
     }
+
+
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             super.onMetadataChanged(metadata)
+
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            Log.println(Log.INFO,"mpuia","onPlaybackStateChanged")
             super.onPlaybackStateChanged(state)
+        }
+
+        override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
+            Log.println(Log.INFO,"mpuia","onQueueChanged")
+            val playlist = supportFragmentManager.findFragmentById(R.id.playlist)
+            viewModel.SongPlayingList=queue
+            playlist?.let { it ->
+                (it as SongItemFragment).bindList(viewModel.SongPlayingList)
+            }
+            super.onQueueChanged(queue)
         }
     }
 
@@ -129,5 +145,10 @@ class MusicPlayUIActivity : AppCompatActivity() {
         ) {
             super.onChildrenLoaded(parentId, children, options)
         }
+    }
+
+    fun onPlaylistChanged() {
+        mediaBrowser.subscribe(mediaBrowser.root,subscriptionCallback)
+
     }
 }

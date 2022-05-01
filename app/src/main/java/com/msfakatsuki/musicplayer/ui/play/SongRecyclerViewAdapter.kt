@@ -1,21 +1,22 @@
 package com.msfakatsuki.musicplayer.ui.play
 
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.session.MediaSessionCompat
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import com.msfakatsuki.musicplayer.R
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.msfakatsuki.musicplayer.databinding.FragmentItemBinding
-import com.msfakatsuki.musicplayer.ui.play.placeholder.PlaceholderContent.PlaceholderItem
 
 /**
  * [RecyclerView.Adapter] that can display a [PlaceholderItem].
  * TODO: Replace the implementation with code for your data type.
  */
-class MySongItemRecyclerViewAdapter(
-    private val values: List<PlaceholderItem>
-) : RecyclerView.Adapter<MySongItemRecyclerViewAdapter.ViewHolder>() {
+class SongRecyclerViewAdapter() :
+    ListAdapter<MediaSessionCompat.QueueItem,SongRecyclerViewAdapter.ViewHolder>(
+        SongRecyclerViewAdapter.MediaDescriptionCompatComparator()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
 
@@ -30,12 +31,11 @@ class MySongItemRecyclerViewAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val item = values[position]
-        holder.idView.text = item.id
-        holder.contentView.text = item.content
+        val item = getItem(position)
+        holder.idView.text = item.description.title
+        holder.contentView.text = item.description.subtitle
     }
 
-    override fun getItemCount(): Int = values.size
 
     inner class ViewHolder(binding: FragmentItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val idView: TextView = binding.itemNumber
@@ -46,4 +46,20 @@ class MySongItemRecyclerViewAdapter(
         }
     }
 
+    class MediaDescriptionCompatComparator : DiffUtil.ItemCallback<MediaSessionCompat.QueueItem>() {
+        override fun areItemsTheSame(
+            oldItem: MediaSessionCompat.QueueItem,
+            newItem: MediaSessionCompat.QueueItem
+        ): Boolean {
+            return oldItem==newItem
+        }
+
+        override fun areContentsTheSame(
+            oldItem: MediaSessionCompat.QueueItem,
+            newItem: MediaSessionCompat.QueueItem
+        ): Boolean {
+            return oldItem.hashCode()==newItem.hashCode()
+        }
+
+    }
 }
