@@ -11,6 +11,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
+import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -49,6 +50,7 @@ class MusicPlayUIFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         Log.println(Log.INFO,"mpuiFrag","OnCreateView")
+
         _binding = MusicPlayUiFragmentBinding.inflate(inflater,container,false)
         return binding.root
     }
@@ -56,7 +58,6 @@ class MusicPlayUIFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.println(Log.INFO,"mpuiFrag","OnViewCreated")
-
         val serviceConnectionObserver = Observer<Boolean> {
             if (it) {
                 registerTransportControls()
@@ -65,11 +66,14 @@ class MusicPlayUIFragment : Fragment() {
             }
         }
 
+        val mediaController = MediaControllerCompat.getMediaController(requireActivity())
+        mediaController.registerCallback(controllerCallbacks)
+
         binding.btnTransfer.setOnClickListener {
             findNavController().navigate(R.id.action_musicPlayUIFragment_to_songItemFragment2)
         }
-
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
+
 
     }
 
@@ -104,6 +108,7 @@ class MusicPlayUIFragment : Fragment() {
         //mediaController.registerCallback((requireActivity() as MusicPlayUIActivity).controllerCallbacks)
 
         mmr.setDataSource(requireContext(),uri)
+
         val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
@@ -130,6 +135,28 @@ class MusicPlayUIFragment : Fragment() {
                 app.repository.insert(item)
             }
         }
+    }
+
+
+    private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
+        override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            metadata?.let{
+                binding.progressBar.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
+                binding.progressBar.invalidate()
+            }
+            super.onMetadataChanged(metadata)
+
+        }
+
+        override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
+            state?.let {
+                binding.progressBar.currentPosition = it.position
+                binding.progressBar.invalidate()
+            }
+            Log.println(Log.INFO,"mpuiF","onPlaybackStateChanged")
+            super.onPlaybackStateChanged(state)
+        }
+
     }
 
 }

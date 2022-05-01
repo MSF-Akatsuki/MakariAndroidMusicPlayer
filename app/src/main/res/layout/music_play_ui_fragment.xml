@@ -8,13 +8,15 @@
     tools:context=".ui.play.MusicPlayUIFragment">
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
+        app:layout_constraintTop_toTopOf="parent">
+
         <Button
             android:id="@+id/btn_choose_song"
             android:layout_width="match_parent"
@@ -43,10 +45,17 @@
             android:id="@+id/btn_transfer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="trans"/>
+            android:text="trans" />
+
 
     </LinearLayout>
 
+    <com.msfakatsuki.musicplayer.view.ProgressBarView
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout" />
 
 
 

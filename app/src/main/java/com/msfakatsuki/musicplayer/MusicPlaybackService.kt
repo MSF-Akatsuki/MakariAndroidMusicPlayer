@@ -8,9 +8,12 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import androidx.media.MediaBrowserServiceCompat
 import android.os.Bundle
+import android.os.Handler
 import android.os.IBinder
+import android.os.Looper
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
@@ -48,6 +51,8 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
     private var mediaId : Long = 0
     private var playBackType:Int = PLAYBACK_SEQUENCIAL
 
+    private var handler : Handler?=null
+
     override fun onCreate() {
         super.onCreate()
         Log.println(Log.INFO,"mpbService","onCreate")
@@ -71,10 +76,39 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             setSessionToken(sessionToken)
         }
 
+        handler = Handler(Looper.getMainLooper())
+        handler?.postDelayed(iTicker,20)
     }
+
+    private val iTicker : Runnable = object : Runnable{
+        override fun run() {
+            handler?.removeCallbacksAndMessages(this)
+
+            mMediaPlayer?.let { mMediaPlayer ->
+                val currentPosition = mMediaPlayer.currentPosition
+                if (mMediaPlayer.isPlaying) {
+                    mediaSession?.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_PLAYING, currentPosition.toLong(), 1.0F
+                        ).build()
+                    )
+                } else {
+                    mediaSession?.setPlaybackState(
+                        stateBuilder.setState(
+                            PlaybackStateCompat.STATE_PAUSED, currentPosition.toLong(), 1.0F
+                        ).build()
+                    )
+                }
+            }
+
+            handler?.postDelayed(this, 800)
+        }
+    }
+
 
     override fun onDestroy() {
         Log.println(Log.INFO,"mpbService","onDestroy")
+        handler?.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
 
@@ -182,7 +216,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
             mSongPlayList.add(MediaSessionCompat.QueueItem(description,mediaId++) )
             mediaSession?.setQueue(mSongPlayList)
-            mediaSession?.setPlaybackState(stateBuilder.setState(0,13, 1.0F).build())
+            // mediaSession?.setPlaybackState(stateBuilder.setState(0,13, 1.0F).build())
             Log.println(Log.INFO,"mpbService","Nothing. playListSize is ${playlistSize}  ${mSongPlayList.size}")
 
             super.onAddQueueItem(description)
@@ -214,6 +248,12 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         val mediaPlayer = MediaPlayer()
         mediaPlayer.setOnPreparedListener {
             mpStatePrepare = STATE_PREPARED
+            mediaSession?.setMetadata(
+                MediaMetadataCompat.Builder().run {
+                    putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.duration.toLong())
+                    build()
+                }
+            )
             it.start()
         }
         mediaPlayer.setOnCompletionListener {
@@ -224,6 +264,10 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
 
     private fun skipToNext(isForced: Boolean=false) = mMediaPlayer?.let { it->
+
+
+        // Only when it is doing a playback sequencial queue is nextSate STATE_PAUSED
+        var nextState:Int = PlaybackStateCompat.STATE_PLAYING
 
         if (isForced || playBackType != PLAYBACK_SINGLE_LOOP) {
             mpStatePrepare = STATE_NEED_PREPARE
@@ -239,6 +283,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                     songId += 1
                 } else {
                     it.setDataSource(this,mSongPlayList[0].description.mediaUri!!)
+                    nextState = PlaybackStateCompat.STATE_PAUSED
                     songId = 0
                 }
             } else if ((isForced && playBackType == PLAYBACK_SEQUENCIAL) || playBackType == PLAYBACK_SEQUENCIAL_LOOP) {
@@ -259,6 +304,9 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                 it.start()
             }
         }
+
+
+
     }
 
     data class MakSongData(

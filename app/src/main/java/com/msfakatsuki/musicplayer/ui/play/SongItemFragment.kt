@@ -10,6 +10,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
 import com.msfakatsuki.musicplayer.R
 
 /**
@@ -50,14 +51,17 @@ class SongItemFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        bindList(viewModel.SongPlayingList)
+        val songPlayingListChangeObserver = Observer<List<MediaSessionCompat.QueueItem>> {
+            bindList(it)
+        }
+        viewModel.SongPlayingList.observe(viewLifecycleOwner,songPlayingListChangeObserver)
+
     }
 
-    fun bindList(list: MutableList<MediaSessionCompat.QueueItem>?) {
+    fun bindList(list: List<MediaSessionCompat.QueueItem>?) {
         list?.let{
             adapter.submitList(it)
         }
-
     }
 
     companion object {

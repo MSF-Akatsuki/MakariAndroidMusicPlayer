@@ -110,22 +110,20 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            super.onMetadataChanged(metadata)
 
+
+            super.onMetadataChanged(metadata)
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
-            Log.println(Log.INFO,"mpuia","onPlaybackStateChanged")
             super.onPlaybackStateChanged(state)
         }
 
         override fun onQueueChanged(queue: MutableList<MediaSessionCompat.QueueItem>?) {
             Log.println(Log.INFO,"mpuia","onQueueChanged")
             val playlist = supportFragmentManager.findFragmentById(R.id.playlist)
-            viewModel.SongPlayingList=queue
-            playlist?.let { it ->
-                (it as SongItemFragment).bindList(viewModel.SongPlayingList)
-            }
+            viewModel.SongPlayingList.value=queue
+
             super.onQueueChanged(queue)
         }
     }
@@ -147,8 +145,4 @@ class MusicPlayUIActivity : AppCompatActivity() {
         }
     }
 
-    fun onPlaylistChanged() {
-        mediaBrowser.subscribe(mediaBrowser.root,subscriptionCallback)
-
-    }
 }

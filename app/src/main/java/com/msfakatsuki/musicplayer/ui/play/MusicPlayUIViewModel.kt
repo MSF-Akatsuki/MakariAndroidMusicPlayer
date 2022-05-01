@@ -13,5 +13,8 @@ class MusicPlayUIViewModel : ViewModel() {
     // TODO: Implement the ViewModel
     var isServiceConnected: MutableLiveData<Boolean> = MutableLiveData<Boolean>(false)
 
-    var SongPlayingList : MutableList<MediaSessionCompat.QueueItem>?=null
+    val SongPlayingList : MutableLiveData<List<MediaSessionCompat.QueueItem>> by lazy {
+        MutableLiveData<List<MediaSessionCompat.QueueItem>>()
+    }
+
 }
