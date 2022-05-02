@@ -132,8 +132,6 @@ class MusicPlayUIFragment : Fragment() {
         }
         mediaController.addQueueItem(mdc)
 
-
-
         uri?.let {
             val item : RoomMusicItem?
             item = RoomMusicItem(

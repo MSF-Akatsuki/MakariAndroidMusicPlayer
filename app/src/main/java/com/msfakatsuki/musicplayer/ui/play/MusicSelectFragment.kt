@@ -81,70 +81,13 @@ class MusicSelectFragment : Fragment() {
     }
 
     val getContent = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { treeUri: Uri?->
-
-        val docTree = DocumentFile.fromTreeUri(requireActivity().application, treeUri!!)
-        val docUriTree = docTree?.uri
-        docUriTree?.path?.let {
-            Log.println(Log.INFO,"mslctFrag","get path :${it}")
+        treeUri?.let { treeUri
+            DbProcessedDialogFragment.newInstance(treeUri.toString()).show(
+                childFragmentManager,"dbfixDialog"
+            )
         }
-        docTree?.let {
-
-            lifecycleScope.launch(Dispatchers.IO) {
-                searchAudioInPath(it)
-            }
-
-        }
-
     }
 
-    @WorkerThread
-    fun searchAudioInPath(docTree : DocumentFile) {
-
-        viewModel.fileReadProcessNumber.postValue(viewModel.fileReadProcessNumber.value?:0 + 1)
-        viewModel.fileDbProcessFlag.postValue(true)
-
-        val queue : Queue<DocumentFile> = LinkedList<DocumentFile>()
-        queue.add(docTree)
-        val mmr = MediaMetadataRetriever()
-        val contentResolver = requireActivity().contentResolver
-        while (queue.isNotEmpty()) {
-            val item = queue.poll() ?: continue
-            if (item.isDirectory) {
-                item.listFiles().forEach {
-                    queue.add(it)
-                }
-            } else if (item.isFile) {
-                val mediaUri = MediaStore.getMediaUri(requireActivity(),item.uri)
-                if (mediaUri?.let { contentResolver.getType(it)?.startsWith("audio", ignoreCase = true) } ==true) {
-                    mmr.setDataSource(requireActivity(),mediaUri)
-
-                    val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)?:"NULL"
-                    val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)?:"NULL"
-                    val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?:"NULL"
-
-
-                    var resultHex : String?=null
-                    /*
-                    contentResolver.openInputStream(mediaUri)?.use { stream->
-                        val bytes = stream.readBytes()
-                        val md = MessageDigest.getInstance("SHA-256")
-                        val digest = md.digest(bytes)
-                        resultHex = digest.fold("") { str, it -> str + "%02x".format(it) }
-                    }
-
-                     */
-
-                    mediaUri.path?.let { path ->
-                        val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,"")
-                        (requireActivity().application as MusicApplication).repository.insert(item = roomMusicItem)
-                    }
-                }
-            }
-
-        }
-        viewModel.fileReadProcessNumber.postValue(viewModel.fileReadProcessNumber.value?:1 - 1)
-
-    }
 
     companion object {
         /**

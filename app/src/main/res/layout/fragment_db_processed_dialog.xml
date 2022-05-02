@@ -5,10 +5,52 @@
     android:layout_height="match_parent"
     tools:context=".ui.play.DbProcessedDialogFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_album_dbp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Album"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="7dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_artist_dbp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Artist"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="end">
+            <Button
+                android:id="@+id/btn_confirm_dbp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confirm"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+
 
 </FrameLayout>
