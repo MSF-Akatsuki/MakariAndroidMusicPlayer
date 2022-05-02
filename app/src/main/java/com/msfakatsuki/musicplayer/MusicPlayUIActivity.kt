@@ -13,6 +13,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.activity.viewModels
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
 import com.msfakatsuki.musicplayer.databinding.MusicPlayUiActivityBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
@@ -38,16 +40,17 @@ class MusicPlayUIActivity : AppCompatActivity() {
             connectionCallbacks,
             null
         )
-        /*
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.container, MusicPlayUIFragment.newInstance())
-                .commitNow()
-        }*/
+
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
-        // val navController = navHostFragment.navController
 
         mediaBrowser.connect()
+
+        viewModel.fileReadProcessNumber.observe(this) {
+            if (viewModel.fileDbProcessFlag.value==true) {
+                
+                viewModel.fileDbProcessFlag.value = false
+            }
+        }
 
     }
 

@@ -1,13 +1,9 @@
 package com.msfakatsuki.musicplayer.ui.play
 
-import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaSessionCompat
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.Flow
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
+import kotlinx.coroutines.flow.MutableStateFlow
 
 class MusicPlayUIViewModel : ViewModel() {
     // TODO: Implement the ViewModel
@@ -17,4 +13,9 @@ class MusicPlayUIViewModel : ViewModel() {
         MutableLiveData<List<MediaSessionCompat.QueueItem>>()
     }
 
+    var duration : Long = 0
+    var currentPosition : Long = 0
+
+    val fileReadProcessNumber by lazy { MutableLiveData<Int>(0) }
+    val fileDbProcessFlag by lazy { MutableLiveData<Boolean>(false) }
 }

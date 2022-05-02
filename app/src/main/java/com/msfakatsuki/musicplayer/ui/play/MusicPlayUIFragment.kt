@@ -52,6 +52,9 @@ class MusicPlayUIFragment : Fragment() {
         Log.println(Log.INFO,"mpuiFrag","OnCreateView")
 
         _binding = MusicPlayUiFragmentBinding.inflate(inflater,container,false)
+        binding.progressBar.duration = viewModel.duration
+        binding.progressBar.currentPosition = viewModel.currentPosition
+
         return binding.root
     }
 
@@ -75,6 +78,13 @@ class MusicPlayUIFragment : Fragment() {
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
 
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        Log.println(Log.INFO,"mpuiF","onDestroyView")
+        val mediaController = MediaControllerCompat.getMediaController(requireActivity())
+        mediaController.unregisterCallback(controllerCallbacks)
     }
 
     private fun unregisterTransportControls() {
@@ -141,7 +151,8 @@ class MusicPlayUIFragment : Fragment() {
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
             metadata?.let{
-                binding.progressBar.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
+                viewModel.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
+                binding.progressBar.duration = viewModel.duration
                 binding.progressBar.invalidate()
             }
             super.onMetadataChanged(metadata)
@@ -150,10 +161,11 @@ class MusicPlayUIFragment : Fragment() {
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {
             state?.let {
+                viewModel.currentPosition = it.position
                 binding.progressBar.currentPosition = it.position
                 binding.progressBar.invalidate()
             }
-            Log.println(Log.INFO,"mpuiF","onPlaybackStateChanged")
+            Log.println(Log.DEBUG,"mpuiF","onPlaybackStateChanged")
             super.onPlaybackStateChanged(state)
         }
 
