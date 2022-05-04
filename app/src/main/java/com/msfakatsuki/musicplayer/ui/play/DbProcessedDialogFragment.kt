@@ -115,6 +115,9 @@ class DbProcessedDialogFragment :  DialogFragment() {
 
 
                     val path = mediaUri.path
+
+                    Log.i("fbpdFrag",path?:"NONE")
+
                     val cutS = path?.lastIndexOf('/')
                     val cutD = path?.lastIndexOf('.')
                     val filename : String = if (cutS!=null && cutD!=null && cutS!=-1 && cutD!=-1 )
@@ -123,11 +126,17 @@ class DbProcessedDialogFragment :  DialogFragment() {
                         path.substring(cutS+1)
                     else "NULL"
 
+                    val metaTitle = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+                    val metaAlbum = pAlbum?:mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
+                    val metaArtist = pArtist?:mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
 
-                    val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)?:filename
-                    val album = pAlbum?:mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)?:"NULL"
-                    val artist = pArtist?:mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)?:"NULL"
+                    val title = metaTitle?:item.name?:"NULL"
+                    val album = metaAlbum?:"NULL"
+                    val artist = metaArtist?:"NULL"
 
+                    val hasTitle = metaTitle!=null
+                    val hasAlbum = metaAlbum!=null
+                    val hasArtist = metaArtist!=null
 
                     var resultHex : String?=null
                     /*
@@ -140,8 +149,9 @@ class DbProcessedDialogFragment :  DialogFragment() {
 
                      */
 
-                    mediaUri.path?.let { path ->
+                    mediaUri.toString().let { path ->
                         val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,"")
+                        Log.i("?sdvaew",roomMusicItem.localPath)
                         (activity.application as MusicApplication).repository.insert(item = roomMusicItem)
                     }
                 }

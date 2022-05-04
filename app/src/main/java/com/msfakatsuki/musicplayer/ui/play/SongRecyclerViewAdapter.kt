@@ -34,12 +34,14 @@ class SongRecyclerViewAdapter() :
         val item = getItem(position)
         holder.idView.text = item.description.title
         holder.contentView.text = item.description.subtitle
+        holder.descView.text = item.description.extras?.getString("artist")?:"NONE"
     }
 
 
     inner class ViewHolder(binding: FragmentItemBinding) : RecyclerView.ViewHolder(binding.root) {
         val idView: TextView = binding.itemNumber
         val contentView: TextView = binding.content
+        val descView: TextView = binding.desc
 
         override fun toString(): String {
             return super.toString() + " '" + contentView.text + "'"

@@ -80,6 +80,7 @@ class MusicPlayUIActivity : AppCompatActivity() {
     private val connectionCallbacks =object : MediaBrowserCompat.ConnectionCallback() {
 
         override fun onConnected() {
+            Log.i("MPS_CON","CONNECTED")
             mediaBrowser.sessionToken.also { token ->
                 val mediaController = MediaControllerCompat(
                     this@MusicPlayUIActivity,

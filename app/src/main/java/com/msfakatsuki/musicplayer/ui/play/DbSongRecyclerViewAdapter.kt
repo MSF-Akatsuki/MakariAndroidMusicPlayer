@@ -1,10 +1,20 @@
 package com.msfakatsuki.musicplayer.ui.play
 
+import android.app.Activity
+import android.media.MediaDescription
+import android.net.Uri
+import android.os.Bundle
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.session.MediaControllerCompat
+import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.MediaController
 import android.widget.TextView
+import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
@@ -18,14 +28,14 @@ class DbSongRecyclerViewAdapter(
     // private val values: List<PlaceholderItem>
 ) : ListAdapter<RoomMusicItem,DbSongRecyclerViewAdapter.ViewHolder>(DbSongRecyclerViewAdapter.MusicItemComparator()) {
 
+    var mediaController : MediaControllerCompat? =null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
         return ViewHolder(
             FragmentDbsongItemBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
-            )
+            ),parent
         )
 
     }
@@ -36,19 +46,16 @@ class DbSongRecyclerViewAdapter(
     }
 
 
-    inner class ViewHolder(binding: FragmentDbsongItemBinding) :
+    class ViewHolder(binding: FragmentDbsongItemBinding,val parent: ViewGroup) :
         RecyclerView.ViewHolder(binding.root) {
         val idView: TextView = binding.itemNumber
         val contentView: TextView = binding.content
-        val dbSongLayout: LinearLayout = binding.layoutDbsong
-
+        val dbSongLayout = binding.layoutDbsong
         var bindedSongItem : RoomMusicItem?=null
 
-
-
         init {
-            dbSongLayout.setOnClickListener {
-                binding.root.context
+            binding.layoutDbsong.setOnLongClickListener{
+                it.showContextMenu()
             }
         }
 
@@ -57,6 +64,26 @@ class DbSongRecyclerViewAdapter(
             idView.text = dbSongItem.title
             contentView.text = dbSongItem.artist
         }
+
+        public fun addToPlaylist() {
+            bindedSongItem?.let {
+                val extra = Bundle()
+                extra.putString("artist",it.artist)
+                extra.putString("album",it.album)
+                extra.putLong("id",it.id.toLong())
+                Log.i("dbSRVAdap",it.localPath)
+                MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
+                    MediaDescriptionCompat.Builder().run {
+                        setMediaUri(Uri.parse(it.localPath))
+                        setTitle(it.title)
+                        setExtras(extra)
+                        build()
+                    }
+                )
+            }
+        }
+
+
 
         override fun toString(): String {
             return super.toString() + " '" + contentView.text + "'"

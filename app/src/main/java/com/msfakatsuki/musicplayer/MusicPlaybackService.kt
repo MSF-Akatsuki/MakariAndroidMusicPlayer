@@ -46,6 +46,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
     private val lcg = LinearRandomGenerator()
     private val mSongPlayList = arrayListOf<MediaSessionCompat.QueueItem>()
+    private val mMediaIdSet = mutableSetOf<Long>()
     private val playlistSize get() = mSongPlayList.size
     private var songId : Int = -1
     private var mediaId : Long = 0
@@ -101,7 +102,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                 }
             }
 
-            handler?.postDelayed(this, 800)
+            handler?.postDelayed(this, 100)
         }
     }
 
@@ -174,7 +175,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                     mMediaPlayer = createMediaPlayer()
                     if (playlistSize > 0 ) {
                         mSongPlayList[0].description.mediaUri?.let {
-                            Log.println(Log.INFO,"mpbService","Set data source of mediaplayer")
+                            Log.println(Log.INFO,"mpbService","Set data source of mediaplayer${it.toString()}")
                             mMediaPlayer!!.setDataSource(baseContext, it)
                             songId = 0
                             mMediaPlayer!!.prepareAsync()
@@ -208,13 +209,19 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         override fun onAddQueueItem(description: MediaDescriptionCompat?) {
             Log.println(Log.INFO,"mpbService","onAddQueueItem")
 
-            description?:return
+            val id = description?.extras?.getLong("id")
+            id?:return
+
+            if (mMediaIdSet.contains(id))
+                return
+            else
+                mMediaIdSet.add(id)
 
             if (playBackType== PLAYBACK_SHUFFLED) {
                 songId %= playlistSize
             }
 
-            mSongPlayList.add(MediaSessionCompat.QueueItem(description,mediaId++) )
+            mSongPlayList.add(MediaSessionCompat.QueueItem(description, id) )
             mediaSession?.setQueue(mSongPlayList)
             // mediaSession?.setPlaybackState(stateBuilder.setState(0,13, 1.0F).build())
             Log.println(Log.INFO,"mpbService","Nothing. playListSize is ${playlistSize}  ${mSongPlayList.size}")

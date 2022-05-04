@@ -50,7 +50,7 @@
 
     </LinearLayout>
 
-    <com.msfakatsuki.musicplayer.view.ProgressBarView
+    <com.msfakatsuki.musicplayer.util.view.ProgressBarView
         android:id="@+id/progress_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

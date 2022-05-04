@@ -1,4 +1,4 @@
-package com.msfakatsuki.musicplayer.view
+package com.msfakatsuki.musicplayer.util.view
 
 import android.content.Context
 import android.graphics.Canvas

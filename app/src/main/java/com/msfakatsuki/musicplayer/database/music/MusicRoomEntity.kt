@@ -16,6 +16,10 @@ data class RoomMusicItem(
     val remoteLink: String
 )
 
+data class RoomSizeItem(val size:Int)
+data class RoomArtistItem(val artist: String)
+data class RoomAlbumItem(val album: String)
+
 @Dao
 interface RoomMusicDao {
 
@@ -34,12 +38,24 @@ interface RoomMusicDao {
     @Query("SELECT * FROM MusicMetaData WHERE title LIKE :reg")
     fun getMusicByTitleRegex(reg : String):List<RoomMusicItem>
 
+    @Query("SELECT * FROM MusicMetaData WHERE artist LIKE :reg")
+    fun getMusicByArtistRegex(reg : String):List<RoomMusicItem>
+
     @Query("SELECT * FROM MusicMetaData WHERE artist IN (:listArtists)")
     fun getMusicByArtistsList(listArtists : Array<String>):List<RoomMusicItem>
-
-
 
     @Query("SELECT * FROM MusicMetaData WHERE album IN (:listAlbums)")
     fun getMusicByAlbumsList(listAlbums : Array<String>):List<RoomMusicItem>
 
+    @Query("SELECT COUNT(*) as size FROM MusicMetaData WHERE localPath == :location")
+    fun checkListSizeOfLocalPath(location: String):RoomSizeItem
+
+    @Query("SELECT distinct artist FROM MusicMetaData")
+    fun getAllArtist(): Flow<List<RoomArtistItem>>
+
+    @Query("SELECT distinct album FROM MusicMetaData")
+    fun getAllAlbum(): Flow<List<RoomAlbumItem>>
+
+    @Query("SELECT distinct album FROM MusicMetaData where artist IN (:listArtists)")
+    fun getAlbumByArtistsList(listArtists : Array<String>): List<RoomAlbumItem>
 }
