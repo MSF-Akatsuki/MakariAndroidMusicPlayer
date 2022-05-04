@@ -44,6 +44,7 @@ class DbSongListFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        setHasOptionsMenu(true)
         binding = FragmentDbsongListBinding.inflate(inflater, container, false)
         val view = binding.root
         // Set the adapter
@@ -62,6 +63,11 @@ class DbSongListFragment : Fragment() {
         registerForContextMenu(binding.list)
 
         return view
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_appbar,menu)
     }
 
     override fun onCreateContextMenu(

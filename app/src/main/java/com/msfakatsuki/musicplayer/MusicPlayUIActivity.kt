@@ -16,6 +16,9 @@ import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.NavHostFragment
+import androidx.navigation.ui.AppBarConfiguration
+import androidx.navigation.ui.setupActionBarWithNavController
+import androidx.navigation.ui.setupWithNavController
 import com.msfakatsuki.musicplayer.databinding.MusicPlayUiActivityBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
@@ -40,9 +43,6 @@ class MusicPlayUIActivity : AppCompatActivity() {
             connectionCallbacks,
             null
         )
-
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
-
         mediaBrowser.connect()
 
         viewModel.fileReadProcessNumber.observe(this) {
@@ -51,6 +51,12 @@ class MusicPlayUIActivity : AppCompatActivity() {
                 viewModel.fileDbProcessFlag.value = false
             }
         }
+
+        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
+        val localNavController = navHostFragment.navController
+        val appBarConfiguration = AppBarConfiguration(localNavController.graph)
+
+        setupActionBarWithNavController(localNavController,appBarConfiguration)
 
     }
 
