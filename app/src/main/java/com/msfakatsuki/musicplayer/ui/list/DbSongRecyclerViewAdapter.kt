@@ -1,7 +1,6 @@
-package com.msfakatsuki.musicplayer.ui.play
+package com.msfakatsuki.musicplayer.ui.list
 
 import android.app.Activity
-import android.media.MediaDescription
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
@@ -9,12 +8,8 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
-import android.widget.MediaController
 import android.widget.TextView
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
@@ -26,7 +21,7 @@ import com.msfakatsuki.musicplayer.databinding.FragmentDbsongItemBinding
  */
 class DbSongRecyclerViewAdapter(
     // private val values: List<PlaceholderItem>
-) : ListAdapter<RoomMusicItem,DbSongRecyclerViewAdapter.ViewHolder>(DbSongRecyclerViewAdapter.MusicItemComparator()) {
+) : ListAdapter<RoomMusicItem, DbSongRecyclerViewAdapter.ViewHolder>(MusicItemComparator()) {
 
     var mediaController : MediaControllerCompat? =null
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -45,6 +40,9 @@ class DbSongRecyclerViewAdapter(
         holder.bind(item)
     }
 
+    fun checkAll(){
+        TODO("NOT YET IMPLEMENTED")
+    }
 
     class ViewHolder(binding: FragmentDbsongItemBinding,val parent: ViewGroup) :
         RecyclerView.ViewHolder(binding.root) {

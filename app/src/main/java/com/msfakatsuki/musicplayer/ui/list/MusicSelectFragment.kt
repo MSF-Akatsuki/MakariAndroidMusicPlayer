@@ -1,40 +1,19 @@
-package com.msfakatsuki.musicplayer.ui.play
+package com.msfakatsuki.musicplayer.ui.list
 
-import android.annotation.SuppressLint
-import android.content.ContentUris
 import android.content.Intent
-import android.database.Cursor
-import android.media.MediaMetadataRetriever
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.provider.DocumentsContract
-import android.provider.MediaStore
-import android.support.v4.media.MediaDescriptionCompat
-import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
-import androidx.annotation.WorkerThread
-import androidx.core.net.toFile
-import androidx.core.net.toUri
-import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.R
-import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
 import com.msfakatsuki.musicplayer.databinding.FragmentMusicSelectBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import java.security.MessageDigest
-import java.util.*
+import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
 
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -83,7 +62,6 @@ class MusicSelectFragment : Fragment() {
     val getContent = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { treeUri: Uri?->
         treeUri?.let { treeUri
             val contentResolver = requireActivity().contentResolver
-
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 // Check for the freshest data.

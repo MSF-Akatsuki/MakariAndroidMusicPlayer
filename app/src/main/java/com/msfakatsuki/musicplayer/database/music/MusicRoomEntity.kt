@@ -16,9 +16,25 @@ data class RoomMusicItem(
     val remoteLink: String
 )
 
+abstract class SingleStringObject(){
+    abstract override fun toString(): String
+    override fun equals(other: Any?): Boolean {
+        other?:return false
+        if (other::class == this::class){
+            return this.toString()==other.toString()
+        }
+        else
+            return super.equals(other)
+    }
+}
+
 data class RoomSizeItem(val size:Int)
-data class RoomArtistItem(val artist: String)
-data class RoomAlbumItem(val album: String)
+data class RoomArtistItem(val artist: String):SingleStringObject(){
+    override fun toString()=artist
+}
+data class RoomAlbumItem(val album: String):SingleStringObject(){
+    override fun toString()=album
+}
 
 @Dao
 interface RoomMusicDao {
@@ -51,10 +67,10 @@ interface RoomMusicDao {
     fun checkListSizeOfLocalPath(location: String):RoomSizeItem
 
     @Query("SELECT distinct artist FROM MusicMetaData")
-    fun getAllArtist(): Flow<List<RoomArtistItem>>
+    fun getAllArtist(): List<RoomArtistItem>
 
     @Query("SELECT distinct album FROM MusicMetaData")
-    fun getAllAlbum(): Flow<List<RoomAlbumItem>>
+    fun getAllAlbum(): List<RoomAlbumItem>
 
     @Query("SELECT distinct album FROM MusicMetaData where artist IN (:listArtists)")
     fun getAlbumByArtistsList(listArtists : Array<String>): List<RoomAlbumItem>

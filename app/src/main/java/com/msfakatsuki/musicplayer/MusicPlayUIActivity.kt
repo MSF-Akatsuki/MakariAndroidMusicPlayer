@@ -12,13 +12,13 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.setupActionBarWithNavController
-import androidx.navigation.ui.setupWithNavController
+import androidx.navigation.ui.*
 import com.msfakatsuki.musicplayer.databinding.MusicPlayUiActivityBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
@@ -54,11 +54,27 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
         val localNavController = navHostFragment.navController
-        val appBarConfiguration = AppBarConfiguration(localNavController.graph)
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
 
         setupActionBarWithNavController(localNavController,appBarConfiguration)
 
+        binding.navView.setupWithNavController(localNavController)
+
     }
+
+
+
+    override fun onSupportNavigateUp(): Boolean {
+        val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
+        return findNavController(R.id.nav_music_play).navigateUp(appBarConfiguration = appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    /*
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        Log.i("Activ","onOptionsItemSelected")
+        return item.onNavDestinationSelected(findNavController(R.id.nav_music_play)) || super.onOptionsItemSelected(item)
+    }
+     */
 
     override fun onStart() {
 

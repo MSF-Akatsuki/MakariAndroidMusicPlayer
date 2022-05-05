@@ -1,7 +1,6 @@
-package com.msfakatsuki.musicplayer.ui.play
+package com.msfakatsuki.musicplayer.ui.list
 
 import android.app.Activity
-import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Bundle
@@ -21,6 +20,7 @@ import androidx.lifecycle.lifecycleScope
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
 import com.msfakatsuki.musicplayer.databinding.FragmentDbProcessedDialogBinding
+import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.util.*
@@ -48,7 +48,9 @@ class DbProcessedDialogFragment :  DialogFragment() {
         super.onCreate(savedInstanceState)
         arguments?.let {
             try {
-                docTree = DocumentFile.fromTreeUri(requireActivity().application,Uri.parse(it.getString(ARG_DOCTREE_PATH)))
+                docTree = DocumentFile.fromTreeUri(requireActivity().application,Uri.parse(it.getString(
+                    ARG_DOCTREE_PATH
+                )))
             } catch (e:Exception) {
                 Log.w("dbpdFrag","Dialog created with docTree null")
                 docTree = null

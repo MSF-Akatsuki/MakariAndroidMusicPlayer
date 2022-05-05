@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.msfakatsuki.musicplayer.util.view.ContextMenuRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/list"
-    android:name="com.msfakatsuki.musicplayer.DbSongListFragment"
+    android:name="com.msfakatsuki.musicplayer.ui.play.MusicSearchFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginLeft="16dp"
     android:layout_marginRight="16dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context=".ui.list.DbSongListFragment"
-    tools:listitem="@layout/fragment_dbsong_item"
-/>
+    tools:listitem="@layout/fragment_music_search" />

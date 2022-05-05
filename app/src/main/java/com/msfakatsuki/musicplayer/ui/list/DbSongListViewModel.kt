@@ -1,4 +1,4 @@
-package com.msfakatsuki.musicplayer.ui.play
+package com.msfakatsuki.musicplayer.ui.list
 
 import androidx.lifecycle.*
 import com.msfakatsuki.musicplayer.database.music.MusicRoomRepository

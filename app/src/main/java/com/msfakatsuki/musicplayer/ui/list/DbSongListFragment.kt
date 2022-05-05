@@ -1,21 +1,23 @@
-package com.msfakatsuki.musicplayer.ui.play
+package com.msfakatsuki.musicplayer.ui.list
 
-import android.app.Activity
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import android.view.*
-import android.widget.AdapterView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.navigation.navGraphViewModels
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.R
 import com.msfakatsuki.musicplayer.databinding.FragmentDbsongListBinding
 import com.msfakatsuki.musicplayer.util.view.ContextMenuRecyclerView
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * A fragment representing a list of Items.
@@ -27,6 +29,9 @@ class DbSongListFragment : Fragment() {
     private var columnCount = 1
     private lateinit var binding : FragmentDbsongListBinding
     private val adapter =  DbSongRecyclerViewAdapter()
+
+    private val factory: MusicFilterViewModelFactory = MusicFilterViewModelFactory()
+    private val navViewModel: MusicFilterViewModel by navGraphViewModels(R.id.nav_db_list) {factory}
 
     private val listViewModel: DbSongListViewModel by activityViewModels {
         DbSongListViewModelFactory((activity?.application as MusicApplication).repository)
@@ -47,27 +52,63 @@ class DbSongListFragment : Fragment() {
         setHasOptionsMenu(true)
         binding = FragmentDbsongListBinding.inflate(inflater, container, false)
         val view = binding.root
-        // Set the adapter
+
+
         with(view) {
             layoutManager = when {
                 columnCount <= 1 -> LinearLayoutManager(context)
                 else -> GridLayoutManager(context, columnCount)
             }
             adapter = this@DbSongListFragment.adapter
+        }
 
-            listViewModel.songList.observe(viewLifecycleOwner) { itemList ->
-                itemList.let { this@DbSongListFragment.adapter.submitList(it) }
+        listViewModel.songList.observe(viewLifecycleOwner) { itemList ->
+            if (navViewModel.displayState==MusicFilterViewModel.DO_NOTHING)
+                itemList?.let { this@DbSongListFragment.adapter.submitList(it) }
+        }
+
+        navViewModel.selectedArtistList.observe(viewLifecycleOwner) { itemList ->
+            if (itemList != null && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ARTIST_LIST) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val application = requireActivity().application as MusicApplication
+                    val strList = Array<String>(itemList.size) { itemList.get(it).toString() }
+                    val list = application.database.musicDao().getMusicByArtistsList(strList)
+                    this@DbSongListFragment.adapter.submitList(list)
+                }
             }
         }
 
-        registerForContextMenu(binding.list)
+        navViewModel.selectedAlbumList.observe(viewLifecycleOwner) { itemList ->
+            if (itemList!= null
+                && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST
+                || navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST_BY_ARTISTS) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val application = requireActivity().application as MusicApplication
+                    val strList = Array<String>(itemList.size) { itemList.get(it).toString() }
+                    val list = application.database.musicDao().getMusicByAlbumsList(strList)
+                    this@DbSongListFragment.adapter.submitList(list)
+                }
+            }
+        }
 
+
+        registerForContextMenu(binding.list)
         return view
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.menu_appbar,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.action_switch -> {
+                adapter.checkAll()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onCreateContextMenu(
