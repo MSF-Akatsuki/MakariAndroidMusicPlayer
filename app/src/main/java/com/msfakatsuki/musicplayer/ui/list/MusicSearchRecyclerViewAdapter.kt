@@ -9,9 +9,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.msfakatsuki.musicplayer.database.music.SingleStringObject
 import com.msfakatsuki.musicplayer.databinding.FragmentMusicSearchBinding
-
-import com.msfakatsuki.musicplayer.ui.play.placeholder.PlaceholderContent.PlaceholderItem
-
 /**
  * [RecyclerView.Adapter] that can display a [PlaceholderItem].
  * TODO: Replace the implementation with code for your data type.

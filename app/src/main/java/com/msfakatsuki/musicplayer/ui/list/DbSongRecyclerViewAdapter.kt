@@ -24,7 +24,9 @@ class DbSongRecyclerViewAdapter(
 ) : ListAdapter<RoomMusicItem, DbSongRecyclerViewAdapter.ViewHolder>(MusicItemComparator()) {
 
     var mediaController : MediaControllerCompat? =null
+    lateinit var parent:ViewGroup
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        this.parent=parent
         return ViewHolder(
             FragmentDbsongItemBinding.inflate(
                 LayoutInflater.from(parent.context),
@@ -32,7 +34,6 @@ class DbSongRecyclerViewAdapter(
                 false
             ),parent
         )
-
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
@@ -44,7 +45,31 @@ class DbSongRecyclerViewAdapter(
         TODO("NOT YET IMPLEMENTED")
     }
 
-    class ViewHolder(binding: FragmentDbsongItemBinding,val parent: ViewGroup) :
+    fun addAllToPlaylist() {
+        this.currentList.forEach {
+            addItemToPlatlist(it)
+        }
+    }
+
+    fun addItemToPlatlist(item:RoomMusicItem?) {
+        item?.let {
+            val extra = Bundle()
+            extra.putString("artist",it.artist)
+            extra.putString("album",it.album)
+            extra.putLong("id",it.id.toLong())
+            Log.i("dbSRVAdap",it.localPath)
+            MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
+                MediaDescriptionCompat.Builder().run {
+                    setMediaUri(Uri.parse(it.localPath))
+                    setTitle(it.title)
+                    setExtras(extra)
+                    build()
+                }
+            )
+        }
+    }
+
+    inner class ViewHolder(binding: FragmentDbsongItemBinding,val parent: ViewGroup) :
         RecyclerView.ViewHolder(binding.root) {
         val idView: TextView = binding.itemNumber
         val contentView: TextView = binding.content
@@ -64,22 +89,9 @@ class DbSongRecyclerViewAdapter(
         }
 
         public fun addToPlaylist() {
-            bindedSongItem?.let {
-                val extra = Bundle()
-                extra.putString("artist",it.artist)
-                extra.putString("album",it.album)
-                extra.putLong("id",it.id.toLong())
-                Log.i("dbSRVAdap",it.localPath)
-                MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
-                    MediaDescriptionCompat.Builder().run {
-                        setMediaUri(Uri.parse(it.localPath))
-                        setTitle(it.title)
-                        setExtras(extra)
-                        build()
-                    }
-                )
-            }
+            this@DbSongRecyclerViewAdapter.addItemToPlatlist(bindedSongItem)
         }
+
 
 
 

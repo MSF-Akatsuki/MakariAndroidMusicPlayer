@@ -107,6 +107,10 @@ class DbSongListFragment : Fragment() {
                 adapter.checkAll()
                 true
             }
+            R.id.action_add_to_playlist -> {
+                adapter.addAllToPlaylist()
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
