@@ -107,6 +107,9 @@ class MusicPlayUIFragment : Fragment() {
         binding.btnPause.setOnClickListener {
             mediaController.transportControls.pause()
         }
+        binding.btnSkipNext.setOnClickListener {
+            mediaController.transportControls.skipToNext()
+        }
         binding.btnChooseSong.setOnClickListener {
             getContent.launch("audio/*")
         }
@@ -116,6 +119,8 @@ class MusicPlayUIFragment : Fragment() {
     val mmr = MediaMetadataRetriever()
 
     val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
+        uri?:return@registerForActivityResult
+
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         //mediaController.registerCallback((requireActivity() as MusicPlayUIActivity).controllerCallbacks)
 

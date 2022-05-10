@@ -169,6 +169,8 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
             Log.println(Log.INFO,"mec_callback","on_play")
 
+            if(playlistSize<=0) return
+
             val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             audioFocusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {

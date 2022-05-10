@@ -26,36 +26,45 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
+
             <Button
+                android:layout_gravity="center"
                 android:id="@+id/btn_choose_song"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Button" />
-
-            <Button
-                android:id="@+id/btn_play"
-                android:layout_width="match_parent"
+            <ImageButton
+                android:id="@+id/btn_skip_next"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Play" />
-
-
+                style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+                android:src="@drawable/ic_action_media_skip_next"/>
         </LinearLayout>
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="horizontal">
-        <Button
-            android:id="@+id/btn_stop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Stop" />
-
-        <Button
+        <ImageButton
             android:id="@+id/btn_pause"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="pause" />
+            style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+            android:src="@drawable/ic_action_media_pause"  />
+        <ImageButton
+            android:id="@+id/btn_stop"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+            android:src="@drawable/ic_action_media_stop" />
+        <ImageButton
+            android:id="@+id/btn_play"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+            android:src="@drawable/ic_action_media_play" />
+
+
 
     </LinearLayout>
         <Button
@@ -63,6 +72,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="trans" />
+
+
 
     </LinearLayout>
 
