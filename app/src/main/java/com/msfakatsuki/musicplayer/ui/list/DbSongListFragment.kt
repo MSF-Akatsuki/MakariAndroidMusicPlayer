@@ -6,6 +6,7 @@ import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import android.view.*
+import androidx.core.graphics.drawable.toIcon
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,7 +16,7 @@ import androidx.navigation.navGraphViewModels
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.R
 import com.msfakatsuki.musicplayer.databinding.FragmentDbsongListBinding
-import com.msfakatsuki.musicplayer.util.view.ContextMenuRecyclerView
+import com.msfakatsuki.musicplayer.util.ContextMenuRecyclerView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
@@ -152,6 +153,7 @@ class DbSongListFragment : Fragment() {
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
             Log.i("dbSRVAdap",it.localPath)
+            Log.i("dbSRVAdap",Uri.parse(it.localPath).toIcon().uri.toString())
             MediaControllerCompat.getMediaController(requireActivity())?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localPath))

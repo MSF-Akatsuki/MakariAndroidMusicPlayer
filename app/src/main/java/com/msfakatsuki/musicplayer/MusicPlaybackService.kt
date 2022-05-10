@@ -2,10 +2,12 @@ package com.msfakatsuki.musicplayer
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.MediaPlayer
+import android.media.browse.MediaBrowser
 import androidx.media.MediaBrowserServiceCompat
 import android.os.Bundle
 import android.os.Handler
@@ -17,6 +19,12 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import com.msfakatsuki.musicplayer.util.DetailedMediaPlayer
+import kotlinx.coroutines.*
+import java.lang.Runnable
 
 
 class MusicPlaybackService : MediaBrowserServiceCompat() {
@@ -35,10 +43,12 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         val STATE_PREPARED = 2
     }
 
+    private val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
+
     private val MAK_MUSIC_EMPTY_ROOT_ID = "EMPTY"
     private val MAK_MUSIC_PLAYLIST_ROOT_ID = "ROOT"
 
-    private var mMediaPlayer: MediaPlayer?=null
+    private var mMediaPlayer: DetailedMediaPlayer?=null
     private var mpStatePrepare: Int = STATE_NEED_PREPARE
 
     private var mediaSession: MediaSessionCompat?=null
@@ -48,11 +58,16 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
     private val mSongPlayList = arrayListOf<MediaSessionCompat.QueueItem>()
     private val mMediaIdSet = mutableSetOf<Long>()
     private val playlistSize get() = mSongPlayList.size
-    private var songId : Int = -1
+
+    private var songId : Int=0
+
     private var mediaId : Long = 0
     private var playBackType:Int = PLAYBACK_SEQUENCIAL
 
     private var handler : Handler?=null
+
+    private var playingMetadata:MediaMetadataCompat?=null
+
 
     override fun onCreate() {
         super.onCreate()
@@ -81,6 +96,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         handler?.postDelayed(iTicker,20)
     }
 
+
     private val iTicker : Runnable = object : Runnable{
         override fun run() {
             handler?.removeCallbacksAndMessages(this)
@@ -93,12 +109,13 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                             PlaybackStateCompat.STATE_PLAYING, currentPosition.toLong(), 1.0F
                         ).build()
                     )
-                } else {
+                } else  {
+                    /*
                     mediaSession?.setPlaybackState(
                         stateBuilder.setState(
                             PlaybackStateCompat.STATE_PAUSED, currentPosition.toLong(), 1.0F
                         ).build()
-                    )
+                    )*/
                 }
             }
 
@@ -110,6 +127,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
     override fun onDestroy() {
         Log.println(Log.INFO,"mpbService","onDestroy")
         handler?.removeCallbacksAndMessages(null)
+        coroutineScope.cancel()
         super.onDestroy()
     }
 
@@ -176,7 +194,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                     if (playlistSize > 0 ) {
                         mSongPlayList[0].description.mediaUri?.let {
                             Log.println(Log.INFO,"mpbService","Set data source of mediaplayer${it.toString()}")
-                            mMediaPlayer!!.setDataSource(baseContext, it)
+                            mMediaPlayer!!.setDataSourceByDescription(baseContext, mSongPlayList[0].description)
                             songId = 0
                             mMediaPlayer!!.prepareAsync()
                         }
@@ -251,16 +269,12 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
     }
 
-    fun createMediaPlayer():MediaPlayer {
-        val mediaPlayer = MediaPlayer()
+    fun createMediaPlayer():DetailedMediaPlayer {
+        val mediaPlayer = DetailedMediaPlayer(coroutineScope,onPlayerMetaLoadedListener)
         mediaPlayer.setOnPreparedListener {
+            val mp = it as DetailedMediaPlayer
             mpStatePrepare = STATE_PREPARED
-            mediaSession?.setMetadata(
-                MediaMetadataCompat.Builder().run {
-                    putLong(MediaMetadataCompat.METADATA_KEY_DURATION, mediaPlayer.duration.toLong())
-                    build()
-                }
-            )
+            if(mp.isMetadataLoaded) updateMetadata(mp)
             it.start()
         }
         mediaPlayer.setOnCompletionListener {
@@ -277,7 +291,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         var nextState:Int = PlaybackStateCompat.STATE_PLAYING
 
         if (isForced || playBackType != PLAYBACK_SINGLE_LOOP) {
-            mpStatePrepare = STATE_NEED_PREPARE
+            nextState = STATE_NEED_PREPARE
             it.reset()
         }
 
@@ -285,35 +299,33 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             if (!isForced && playBackType == PLAYBACK_SEQUENCIAL) {
                 if (songId + 1 < playlistSize) {
                     /*Todo: Figure out how to avoid !! cast*/
-                    it.setDataSource(this,mSongPlayList[songId + 1].description.mediaUri!!)
+                    it.setDataSourceByDescription(this,mSongPlayList[songId + 1].description)
                     it.prepareAsync()
                     songId += 1
                 } else {
-                    it.setDataSource(this,mSongPlayList[0].description.mediaUri!!)
+                    it.setDataSourceByDescription(this,mSongPlayList[0].description)
                     nextState = PlaybackStateCompat.STATE_PAUSED
                     songId = 0
                 }
             } else if ((isForced && playBackType == PLAYBACK_SEQUENCIAL) || playBackType == PLAYBACK_SEQUENCIAL_LOOP) {
                 if (songId + 1 < playlistSize) {
-                    it.setDataSource(this,mSongPlayList[songId + 1].description.mediaUri!!)
+                    it.setDataSourceByDescription(this,mSongPlayList[songId + 1].description)
                     it.prepareAsync()
                     songId += 1
                 } else {
-                    it.setDataSource(this,mSongPlayList[0].description.mediaUri!!)
+                    it.setDataSourceByDescription(this,mSongPlayList[0].description)
                     it.prepareAsync()
                     songId = 0
                 }
             } else if (playBackType == PLAYBACK_SHUFFLED) {
                 songId = lcg.next(songId)
-                it.setDataSource(this,mSongPlayList[songId%playlistSize].description.mediaUri!!)
+                it.setDataSourceByDescription(this,mSongPlayList[songId%playlistSize].description)
                 it.prepareAsync()
             } else if (!isForced && playBackType == PLAYBACK_SINGLE_LOOP) {
                 it.start()
             }
         }
-
-
-
+        mpStatePrepare = nextState
     }
 
     data class MakSongData(
@@ -322,6 +334,25 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         public val artist: String?,
         public val album: String?
     )
+
+    val onPlayerMetaLoadedListener = object : DetailedMediaPlayer.OnMetadataLoadedListener() {
+        override fun onMetadataLoaded(mp: DetailedMediaPlayer) {
+            super.onMetadataLoaded(mp)
+            if (mp.statePrepare == DetailedMediaPlayer.STATE_PREPARED) {
+                updateMetadata(mp)
+            }
+        }
+    }
+
+    private fun updateMetadata(mp: DetailedMediaPlayer) {
+        mp.let { player->
+            val builder = player.meta?.let{ meta-> MediaMetadataCompat.Builder(meta) }
+            builder?.let { it->
+                it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION,player.duration.toLong())
+                mediaSession?.setMetadata(it.build())
+            }
+        }
+    }
 
     class LinearRandomGenerator(
         private val modulo:Long=2147483647,

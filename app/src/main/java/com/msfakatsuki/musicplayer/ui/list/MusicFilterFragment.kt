@@ -1,5 +1,6 @@
 package com.msfakatsuki.musicplayer.ui.list
 
+import android.content.res.Resources
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -68,6 +69,7 @@ class MusicFilterFragment : Fragment() {
             SyncList()
             findNavController().navigateUp()
         }
+
 
         binding.filterSwitch.setOnClickListener {
             SyncList()

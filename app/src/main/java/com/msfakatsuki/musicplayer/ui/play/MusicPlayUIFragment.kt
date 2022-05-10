@@ -19,10 +19,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.MusicPlayUIActivity
 import com.msfakatsuki.musicplayer.MusicPlaybackService
@@ -122,12 +124,19 @@ class MusicPlayUIFragment : Fragment() {
         val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
         val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
         val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+        val icon  = mmr.embeddedPicture
+
+        Log.i("ICONSIZE",icon?.size.toString())
 
 
         Log.println(Log.INFO,"get_content",uri.toString())
         val mdc:MediaDescriptionCompat = MediaDescriptionCompat.Builder().run {
             setMediaUri(uri)
             setTitle(title)
+            setExtras(Bundle().apply {
+                putString("artist", artist)
+                putString("album", album)
+            })
             build()
         }
         mediaController.addQueueItem(mdc)
@@ -148,13 +157,17 @@ class MusicPlayUIFragment : Fragment() {
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+            Log.i("oMDcgd","onMetadataChanged ${metadata.toString()}")
             metadata?.let{
                 viewModel.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
                 binding.progressBar.duration = viewModel.duration
+                val bitmap = it.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON)
+                bitmap?.let { bm ->
+                    Glide.with(requireContext()).load(bm).into(binding.ivMediaIcon)
+                }?:Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
                 binding.progressBar.invalidate()
             }
             super.onMetadataChanged(metadata)
-
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {

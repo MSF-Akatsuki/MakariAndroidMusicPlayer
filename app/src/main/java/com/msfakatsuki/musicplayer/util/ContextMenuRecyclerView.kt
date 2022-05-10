@@ -1,17 +1,11 @@
-package com.msfakatsuki.musicplayer.util.view
+package com.msfakatsuki.musicplayer.util
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.graphics.drawable.Drawable
-import android.text.TextPaint
 import android.util.AttributeSet
 import android.util.Log
 import android.view.ContextMenu
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.msfakatsuki.musicplayer.R
 
 /**
  * TODO: document your custom view class.

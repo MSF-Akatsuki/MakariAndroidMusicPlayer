@@ -118,7 +118,7 @@ class DbProcessedDialogFragment :  DialogFragment() {
 
                     val path = mediaUri.path
 
-                    Log.i("fbpdFrag",path?:"NONE")
+                    Log.i("fbpdFrag",mediaUri.toString()?:"NONE")
 
                     val cutS = path?.lastIndexOf('/')
                     val cutD = path?.lastIndexOf('.')
