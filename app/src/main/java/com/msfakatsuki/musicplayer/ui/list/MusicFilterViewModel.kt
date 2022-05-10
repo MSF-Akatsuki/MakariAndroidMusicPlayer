@@ -14,6 +14,8 @@ class MusicFilterViewModel() : ViewModel() {
         MutableLiveData<List<SingleStringObject>>()
     }
 
+    var isFiltered = false
+
     companion object{
         val DO_NOTHING = 0
         val DISPLAY_ARTIST_LIST = 1
@@ -31,6 +33,7 @@ class MusicFilterViewModel() : ViewModel() {
         selectedAlbumList.value = null
         selectedArtistList.value = null
         displayState=DISPLAY_ARTIST_LIST
+        isFiltered = false
     }
 
 }

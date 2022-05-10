@@ -52,7 +52,7 @@ class MusicSelectFragment : Fragment() {
         }
 
         binding.btnSwitchPlay.setOnClickListener {
-            findNavController().navigate(R.id.action_musicSelectFragment_to_musicPlayUIFragment)
+            findNavController().navigate(R.id.action_musicSelectFragment_to_playerViewPagerFragment)
         }
         binding.btnScanSongs.setOnClickListener {
             getContent.launch(null)

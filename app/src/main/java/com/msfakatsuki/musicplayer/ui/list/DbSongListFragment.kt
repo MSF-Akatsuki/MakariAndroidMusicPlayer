@@ -69,7 +69,7 @@ class DbSongListFragment : Fragment() {
         }
 
         navViewModel.selectedArtistList.observe(viewLifecycleOwner) { itemList ->
-            if (itemList != null && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ARTIST_LIST) {
+            if (navViewModel.isFiltered && itemList != null && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ARTIST_LIST) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val application = requireActivity().application as MusicApplication
                     val strList = Array<String>(itemList.size) { itemList.get(it).toString() }
@@ -80,9 +80,10 @@ class DbSongListFragment : Fragment() {
         }
 
         navViewModel.selectedAlbumList.observe(viewLifecycleOwner) { itemList ->
-            if (itemList!= null
-                && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST
-                || navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST_BY_ARTISTS) {
+            Log.i("wthtah",navViewModel.isFiltered.toString())
+            if (navViewModel.isFiltered && itemList!= null
+                && ( navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST
+                || navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST_BY_ARTISTS)) {
                 lifecycleScope.launch(Dispatchers.IO) {
                     val application = requireActivity().application as MusicApplication
                     val strList = Array<String>(itemList.size) { itemList.get(it).toString() }

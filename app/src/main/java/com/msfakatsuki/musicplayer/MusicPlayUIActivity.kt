@@ -22,6 +22,7 @@ import androidx.navigation.ui.*
 import com.msfakatsuki.musicplayer.databinding.MusicPlayUiActivityBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
+import com.msfakatsuki.musicplayer.ui.play.PlayerViewPagerFragment
 import com.msfakatsuki.musicplayer.ui.play.SongItemFragment
 
 class MusicPlayUIActivity : AppCompatActivity() {
@@ -62,7 +63,13 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
     }
 
+    var OnBackPressedCallback: (() -> Boolean)?=null
 
+    override fun onBackPressed() {
+        OnBackPressedCallback?.let {
+            if(!it()) super.onBackPressed()
+        }?: super.onBackPressed()
+    }
 
     override fun onSupportNavigateUp(): Boolean {
         val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)

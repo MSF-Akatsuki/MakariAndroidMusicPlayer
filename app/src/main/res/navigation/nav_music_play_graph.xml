@@ -33,8 +33,8 @@
             android:label="fragment_music_select"
             tools:layout="@layout/fragment_dbsong_list">
             <action
-                android:id="@+id/action_musicSelectFragment_to_musicPlayUIFragment"
-                app:destination="@id/musicPlayUIFragment" />
+                android:id="@+id/action_musicSelectFragment_to_playerViewPagerFragment"
+                app:destination="@id/playerViewPagerFragment" />
             <action
                 android:id="@+id/action_musicSelectFragment_to_musicFilterFragment"
                 app:destination="@id/musicFilterFragment" />
@@ -48,6 +48,14 @@
                 android:id="@+id/action_musicFilterFragment_to_musicSelectFragment"
                 app:destination="@id/musicSelectFragment" />
         </fragment>
+        <action
+            android:id="@+id/action_global_playerViewPagerFragment"
+            app:destination="@id/playerViewPagerFragment" />
     </navigation>
+    <fragment
+        android:id="@+id/playerViewPagerFragment"
+        android:name="com.msfakatsuki.musicplayer.ui.play.PlayerViewPagerFragment"
+        android:label="fragment_player_view_pager"
+        tools:layout="@layout/fragment_player_view_pager" />
 
 </navigation>

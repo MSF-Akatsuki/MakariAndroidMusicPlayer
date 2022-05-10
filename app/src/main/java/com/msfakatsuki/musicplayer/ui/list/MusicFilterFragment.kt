@@ -67,6 +67,7 @@ class MusicFilterFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.filterConfirm.setOnClickListener {
             SyncList()
+            navViewModel.isFiltered = true
             findNavController().navigateUp()
         }
 

@@ -71,7 +71,7 @@ class SongItemFragment : Fragment() {
 
         // TODO: Customize parameter initialization
         @JvmStatic
-        fun newInstance(columnCount: Int) =
+        fun newInstance(columnCount: Int = 1) =
             SongItemFragment().apply {
                 arguments = Bundle().apply {
                     putInt(ARG_COLUMN_COUNT, columnCount)
