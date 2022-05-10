@@ -162,7 +162,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             result.sendResult(null)
         return
     }
-    private lateinit var afChangeListener : AudioManager.OnAudioFocusChangeListener
+
     private lateinit var audioFocusRequest : AudioFocusRequest
     private val callback = object: MediaSessionCompat.Callback() {
         override fun onPlay() {
@@ -172,8 +172,9 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             val am = baseContext.getSystemService(Context.AUDIO_SERVICE) as AudioManager
 
             audioFocusRequest=AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
-                //setOnAudioFocusChangeListener(afChangeListener)
+                setOnAudioFocusChangeListener(afChangeListener)
                 setAudioAttributes(AudioAttributes.Builder().run{
+                    setUsage(AudioAttributes.USAGE_MEDIA)
                     setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
                     build()
                 })
@@ -267,6 +268,22 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             super.onRemoveQueueItem(description)
         }
 
+    }
+
+    private var afChangeListener =object: AudioManager.OnAudioFocusChangeListener {
+        override fun onAudioFocusChange(focusChange: Int) {
+            when(focusChange) {
+                AudioManager.AUDIOFOCUS_LOSS -> {
+                    mediaSession?.controller?.transportControls?.pause()
+                }
+                AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
+                    mediaSession?.controller?.transportControls?.pause()
+                }
+                AudioManager.AUDIOFOCUS_GAIN -> {
+                    mediaSession?.controller?.transportControls?.play()
+                }
+            }
+        }
     }
 
     fun createMediaPlayer():DetailedMediaPlayer {
