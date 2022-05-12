@@ -1,5 +1,6 @@
 package com.msfakatsuki.musicplayer.ui.play
 
+import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,4 +19,6 @@ class MusicPlayUIViewModel : ViewModel() {
 
     val fileReadProcessNumber by lazy { MutableLiveData<Int>(0) }
     val fileDbProcessFlag by lazy { MutableLiveData<Boolean>(false) }
+
+    lateinit var mediaBrowser: MediaBrowserCompat
 }

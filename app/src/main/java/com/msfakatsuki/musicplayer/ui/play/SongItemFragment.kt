@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
+import com.msfakatsuki.musicplayer.MusicPlaybackService
 import com.msfakatsuki.musicplayer.R
 
 /**
@@ -55,7 +56,13 @@ class SongItemFragment : Fragment() {
             bindList(it)
         }
         viewModel.SongPlayingList.observe(viewLifecycleOwner,songPlayingListChangeObserver)
-
+        /*
+        viewModel.mediaBrowser.subscribe(
+            viewModel.mediaBrowser.root,
+            Bundle().apply {
+                putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
+            },subscriptionCallback
+        )*/
     }
 
     fun bindList(list: List<MediaSessionCompat.QueueItem>?) {

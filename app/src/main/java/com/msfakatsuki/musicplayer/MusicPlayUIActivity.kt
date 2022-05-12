@@ -27,8 +27,12 @@ import com.msfakatsuki.musicplayer.ui.play.SongItemFragment
 
 class MusicPlayUIActivity : AppCompatActivity() {
 
-    private lateinit var mediaBrowser: MediaBrowserCompat
+
     val viewModel : MusicPlayUIViewModel by viewModels()
+
+    private var mediaBrowser: MediaBrowserCompat
+        get() = viewModel.mediaBrowser
+        set(value) {viewModel.mediaBrowser=value}
 
     private lateinit var binding:MusicPlayUiActivityBinding
 

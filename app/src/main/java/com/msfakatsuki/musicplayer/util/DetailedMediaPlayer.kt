@@ -46,30 +46,17 @@ class DetailedMediaPlayer(
         val title: String = (description.title ?: "") as String
         val album = description.extras?.getString("album", "")
         val artist = description.extras?.getString("artist", "")
-
-        val iconBytesSaved = description.extras?.getByteArray("icon")?:ByteArray(0,{0})
-        Log.i("cweee",uri.toString())
-        mmr.setDataSource(context, uri)
-        val iconBytesEmbedded =  mmr.embeddedPicture?:ByteArray(0,{0})
+        val mediaUri = description.mediaUri?.toString()
+        val iconUri = description.iconUri?.toString()
 
         coroutineScope.launch(Dispatchers.IO){
-
-            val icon: Bitmap? = description.iconBitmap ?: description.iconUri?.let {
-                Glide.with(context).asBitmap().load(it).submit().get()
-            } ?: kotlin.run {
-                if (iconBytesSaved.isNotEmpty()) Glide.with(context).asBitmap().load(iconBytesSaved)
-                    .submit().get()
-                else if (iconBytesEmbedded.isNotEmpty()) Glide.with(context).asBitmap().load(iconBytesEmbedded)
-                    .submit().get()
-                else null
-            }
-
 
             meta = MediaMetadataCompat.Builder().run {
                 putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
                 putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
                 putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
-                putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, icon)
+                putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,mediaUri)
+                putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI,iconUri)
                 build()
             }
             onMetadataLoadedListener?.onMetadataLoaded(this@DetailedMediaPlayer)

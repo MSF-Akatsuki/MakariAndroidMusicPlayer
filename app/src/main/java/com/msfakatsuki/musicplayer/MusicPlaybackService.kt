@@ -2,12 +2,9 @@ package com.msfakatsuki.musicplayer
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
-import android.media.MediaPlayer
-import android.media.browse.MediaBrowser
 import androidx.media.MediaBrowserServiceCompat
 import android.os.Bundle
 import android.os.Handler
@@ -19,9 +16,6 @@ import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
-import androidx.lifecycle.LifecycleService
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import com.msfakatsuki.musicplayer.util.DetailedMediaPlayer
 import kotlinx.coroutines.*
 import java.lang.Runnable
@@ -41,12 +35,17 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         val STATE_NEED_PREPARE = 0
         val STATE_PREPARING = 1
         val STATE_PREPARED = 2
+
+        val HINT_IS_PLAYER = "hint_is_player"
+        val HINT_IS_PLAYLIST = "hint_is_playlist"
     }
 
     private val coroutineScope = CoroutineScope(Job() + Dispatchers.IO)
 
     private val MAK_MUSIC_EMPTY_ROOT_ID = "EMPTY"
-    private val MAK_MUSIC_PLAYLIST_ROOT_ID = "ROOT"
+    private val MAK_MUSIC_ROOT_ID = "ROOT"
+    private val MAK_MUSIC_PLAYER_ROOT_ID = "PLAYER"
+    private val MAK_MUSIC_PLAYLIST_ROOT_ID = "PLAYLIST"
 
     private var mMediaPlayer: DetailedMediaPlayer?=null
     private var mpStatePrepare: Int = STATE_NEED_PREPARE
@@ -61,7 +60,6 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
     private var songId : Int=0
 
-    private var mediaId : Long = 0
     private var playBackType:Int = PLAYBACK_SEQUENCIAL
 
     private var handler : Handler?=null
@@ -83,7 +81,8 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
                     PlaybackStateCompat.ACTION_PAUSE or
                     PlaybackStateCompat.ACTION_STOP or
                     PlaybackStateCompat.ACTION_SEEK_TO or
-                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT
+                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT or
+                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
                 )
             setPlaybackState(stateBuilder.build())
 
@@ -143,8 +142,14 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         rootHints: Bundle?
     ): BrowserRoot? {
         Log.println(Log.INFO,"mpbService","onGetRoot")
-        if (clientPackageName == "com.msfakatsuki.musicplayer")
-            return BrowserRoot(MAK_MUSIC_PLAYLIST_ROOT_ID,null)
+        if (clientPackageName == "com.msfakatsuki.musicplayer") {
+            return if (rootHints?.getBoolean(HINT_IS_PLAYER) == true)
+                BrowserRoot(MAK_MUSIC_PLAYER_ROOT_ID,null)
+            else if (rootHints?.getBoolean(HINT_IS_PLAYLIST) == true)
+                BrowserRoot(MAK_MUSIC_PLAYLIST_ROOT_ID,null)
+            else
+                BrowserRoot(MAK_MUSIC_ROOT_ID,null)
+        }
         else
             return BrowserRoot(MAK_MUSIC_EMPTY_ROOT_ID,null)
     }
@@ -154,7 +159,30 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
         options: Bundle
     ) {
-        super.onLoadChildren(parentId, result, options)
+        when(parentId) {
+            MAK_MUSIC_ROOT_ID -> {
+                if (options.getBoolean(HINT_IS_PLAYER)){
+                    result.sendResult(
+                        if(playlistSize>0)
+                            mutableListOf(MediaBrowserCompat.MediaItem(mSongPlayList[songId % playlistSize].description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
+                        else
+                            null
+                    )
+                }
+                else if (options.getBoolean(HINT_IS_PLAYLIST))
+                    result.sendResult(MutableList<MediaBrowserCompat.MediaItem>(
+                        playlistSize
+                    ) { index ->
+                        MediaBrowserCompat.MediaItem(
+                            mSongPlayList[index].description,
+                            MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
+                        )
+                    })
+                else super.onLoadChildren(parentId, result, options)
+            }
+            else -> super.onLoadChildren(parentId, result, options)
+        }
+
     }
 
     override fun onLoadChildren(
@@ -164,10 +192,10 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
         Log.println(Log.INFO,"mpbService","onLoadChildren")
 
-        if (parentId==MAK_MUSIC_PLAYLIST_ROOT_ID)
-            result.sendResult(MediaBrowserCompat.MediaItem.fromMediaItemList(mSongPlayList))
-        else
-            result.sendResult(null)
+        when (parentId) {
+            MAK_MUSIC_ROOT_ID->result.sendResult(null)
+            else->result.sendResult(null)
+        }
         return
     }
 
@@ -270,6 +298,11 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             skipToNext(true)
         }
 
+        override fun onSkipToPrevious() {
+            super.onSkipToPrevious()
+            skipToPrevious(true)
+        }
+
         override fun onAddQueueItem(description: MediaDescriptionCompat?, index: Int) {
             super.onAddQueueItem(description, index)
         }
@@ -278,7 +311,18 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             super.onRemoveQueueItem(description)
         }
 
+        override fun onCustomAction(action: String?, extras: Bundle?) {
+            if (action == "CA_REMOVE_ALL_FROM_QUEUE") {
+                mSongPlayList.removeIf { true }
+                mMediaIdSet.removeIf { true }
+                mediaSession?.setQueue(mSongPlayList)
+            }
+            super.onCustomAction(action, extras)
+        }
+
     }
+
+
 
     private var afChangeListener =object: AudioManager.OnAudioFocusChangeListener {
         override fun onAudioFocusChange(focusChange: Int) {
@@ -310,6 +354,25 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         return mediaPlayer
     }
 
+    private fun skipToPrevious(isForced: Boolean=true)= mMediaPlayer?.let { it->
+        if (isForced) {
+            var nextState:Int = PlaybackStateCompat.STATE_PLAYING
+            nextState = STATE_NEED_PREPARE
+            it.reset()
+            if (playlistSize > 0){
+                if((isForced && playBackType == PLAYBACK_SEQUENCIAL) || playBackType == PLAYBACK_SEQUENCIAL_LOOP) {
+                        it.setDataSourceByDescription(this,mSongPlayList[(songId - 1 + playlistSize)%playlistSize].description)
+                        it.prepareAsync()
+                        songId = (songId - 1 + playlistSize)%playlistSize
+                } else if (playBackType == PLAYBACK_SHUFFLED) {
+                    songId = lcg.prior(songId)
+                    it.setDataSourceByDescription(this,mSongPlayList[songId%playlistSize].description)
+                    it.prepareAsync()
+                }
+            }
+            mpStatePrepare = nextState
+        }
+    }
 
     private fun skipToNext(isForced: Boolean=false) = mMediaPlayer?.let { it->
 

@@ -161,6 +161,7 @@ class DbSongListFragment : Fragment() {
                     setMediaUri(Uri.parse(it.localPath))
                     setTitle(it.title)
                     setExtras(extra)
+                    setMediaId(it.id.toString())
                     build()
                 }
             )

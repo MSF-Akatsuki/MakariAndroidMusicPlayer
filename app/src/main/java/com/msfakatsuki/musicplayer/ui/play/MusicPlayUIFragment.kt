@@ -46,7 +46,6 @@ class MusicPlayUIFragment : Fragment() {
 
     private lateinit var mediaBrowser: MediaBrowserCompat
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -77,6 +76,13 @@ class MusicPlayUIFragment : Fragment() {
         
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
+        viewModel.mediaBrowser.subscribe(
+            viewModel.mediaBrowser.root,
+            Bundle().apply {
+                putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
+            },subscriptionCallback
+        )
+
 
     }
 
@@ -85,6 +91,7 @@ class MusicPlayUIFragment : Fragment() {
         Log.println(Log.INFO,"mpuiF","onDestroyView")
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.unregisterCallback(controllerCallbacks)
+        viewModel.mediaBrowser.unsubscribe(viewModel.mediaBrowser.root)
     }
 
     private fun unregisterTransportControls() {
@@ -113,7 +120,37 @@ class MusicPlayUIFragment : Fragment() {
         }
     }
 
+    val subscriptionCallback  = object : MediaBrowserCompat.SubscriptionCallback() {
 
+        override fun onChildrenLoaded(
+            parentId: String,
+            children: MutableList<MediaBrowserCompat.MediaItem>,
+            options: Bundle
+        ) {
+            super.onChildrenLoaded(parentId, children, options)
+            try {
+                val description = children[0].description
+                binding.tvPlayUiAlbum.text = description.extras?.getString("album")
+                binding.tvPlayUiArtist.text = description.extras?.getString("artist")
+                binding.tvPlayUiTitle.text = description.title
+                description.iconUri?.let {
+                    Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
+                }?: kotlin.run {
+                    mmr.setDataSource(requireContext(),description.mediaUri)
+                    val pic = mmr.embeddedPicture?:ByteArray(0)
+                    if (pic.isNotEmpty()) {
+                        Glide.with(requireContext()).load(pic).into(binding.ivMediaIcon)
+                    } else {
+                        Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+                    }
+                }
+
+            }catch (e:Exception) {
+                Log.e("mpuiFrag",e.message?:"NO MESSAGE")
+            }
+        }
+
+    }
     val mmr = MediaMetadataRetriever()
 
     val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
@@ -165,20 +202,26 @@ class MusicPlayUIFragment : Fragment() {
                 binding.progressBar.duration = viewModel.duration
                 binding.progressBar.invalidate()
 
-                val bitmap = it.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON)
-                bitmap?.let { bm ->
-                    Glide.with(requireContext()).load(bm).into(binding.ivMediaIcon)
-                }?:Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+                try {
+                    val description = it.description
+                    binding.tvPlayUiAlbum.text = it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
+                    binding.tvPlayUiArtist.text = it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+                    binding.tvPlayUiTitle.text = description.title
+                    description.iconUri?.let {
+                        Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
+                    }?: kotlin.run {
+                        mmr.setDataSource(requireContext(),description.mediaUri)
+                        val pic = mmr.embeddedPicture?:ByteArray(0)
+                        if (pic.isNotEmpty()) {
+                            Glide.with(requireContext()).load(pic).into(binding.ivMediaIcon)
+                        } else {
+                            Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+                        }
+                    }
 
-                val title = it.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
-                val artist = it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
-                val album = it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
-
-                binding.tvPlayUiTitle.text = title
-                binding.tvPlayUiArtist.text = artist
-                binding.tvPlayUiAlbum.text = album
-
-
+                }catch (e:Exception) {
+                    Log.e("mpuiFrag",e.message?:"NO MESSAGE")
+                }
 
             }
             super.onMetadataChanged(metadata)
