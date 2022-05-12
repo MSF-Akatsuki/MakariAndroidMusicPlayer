@@ -23,7 +23,6 @@ class DbSongRecyclerViewAdapter(
     // private val values: List<PlaceholderItem>
 ) : ListAdapter<RoomMusicItem, DbSongRecyclerViewAdapter.ViewHolder>(MusicItemComparator()) {
 
-    var mediaController : MediaControllerCompat? =null
     lateinit var parent:ViewGroup
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         this.parent=parent

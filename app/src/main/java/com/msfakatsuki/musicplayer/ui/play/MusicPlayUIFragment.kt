@@ -73,10 +73,7 @@ class MusicPlayUIFragment : Fragment() {
 
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.registerCallback(controllerCallbacks)
-
-        binding.btnTransfer.setOnClickListener {
-            findNavController().navigate(R.id.action_musicPlayUIFragment_to_songItemFragment2)
-        }
+        
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
 

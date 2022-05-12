@@ -7,7 +7,6 @@
 
     tools:context=".ui.list.MusicSelectFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fcv_music_select"
         android:name="com.msfakatsuki.musicplayer.ui.list.DbSongListFragment"

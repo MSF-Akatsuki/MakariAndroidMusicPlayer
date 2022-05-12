@@ -27,8 +27,8 @@ class MusicSearchRecyclerViewAdapter(
                 false
             )
         )
-
     }
+
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val item = getItem(position)
@@ -69,8 +69,6 @@ class MusicSearchRecyclerViewAdapter(
                 this@MusicSearchRecyclerViewAdapter.toggleButtonStateList?.set(absoluteAdapterPosition,view.isChecked)
             }
         }
-
-
     }
 
     class SingleStringComparator : DiffUtil.ItemCallback<SingleStringObject>() {

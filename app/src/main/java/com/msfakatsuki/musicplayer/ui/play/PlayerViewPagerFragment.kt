@@ -49,6 +49,14 @@ class PlayerViewPagerFragment : Fragment() {
         }
     }
 
+    override fun onDetach() {
+        super.onDetach()
+        val activity = activity as? MusicPlayUIActivity
+        activity?.let {
+            it.OnBackPressedCallback = null
+        }
+    }
+
     inner class Adapter(fm: FragmentManager): FragmentPagerAdapter(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT) {
 
         override fun getCount() = 2

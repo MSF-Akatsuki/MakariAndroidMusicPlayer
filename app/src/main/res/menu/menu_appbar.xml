@@ -6,7 +6,7 @@
         android:id="@+id/action_switch"
         android:icon="@drawable/ic_action_switch_selection"
         app:showAsAction="ifRoom"
-        android:title="Selection All" />
+        android:title="Switch to media selection" />
     <item
         android:id="@+id/action_add_to_playlist"
         android:icon="@drawable/ic_action_add_all"

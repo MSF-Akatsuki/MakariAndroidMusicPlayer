@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.R
@@ -106,7 +107,7 @@ class DbSongListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.action_switch -> {
-                adapter.checkAll()
+                findNavController().navigate(R.id.action_musicSelectFragment_to_dbSongCheckFragment)
                 true
             }
             R.id.action_add_to_playlist -> {

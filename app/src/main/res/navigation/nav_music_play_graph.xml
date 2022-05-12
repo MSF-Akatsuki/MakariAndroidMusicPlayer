@@ -38,6 +38,9 @@
             <action
                 android:id="@+id/action_musicSelectFragment_to_musicFilterFragment"
                 app:destination="@id/musicFilterFragment" />
+            <action
+                android:id="@+id/action_musicSelectFragment_to_dbSongCheckFragment"
+                app:destination="@id/dbSongCheckFragment" />
         </fragment>
         <fragment
             android:id="@+id/musicFilterFragment"
@@ -51,6 +54,15 @@
         <action
             android:id="@+id/action_global_playerViewPagerFragment"
             app:destination="@id/playerViewPagerFragment" />
+        <fragment
+            android:id="@+id/dbSongCheckFragment"
+            android:name="com.msfakatsuki.musicplayer.ui.list.DbSongCheckFragment"
+            android:label="fragment_db_song_check_list"
+            tools:layout="@layout/fragment_db_song_check_list" >
+            <action
+                android:id="@+id/action_dbSongCheckFragment_to_musicSelectFragment"
+                app:destination="@id/musicSelectFragment" />
+        </fragment>
     </navigation>
     <fragment
         android:id="@+id/playerViewPagerFragment"
