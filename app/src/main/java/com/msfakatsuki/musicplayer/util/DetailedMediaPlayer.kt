@@ -67,7 +67,7 @@ class DetailedMediaPlayer(
 
             meta = MediaMetadataCompat.Builder().run {
                 putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
-                putString(MediaMetadataCompat.METADATA_KEY_ALBUM_ARTIST, artist)
+                putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
                 putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
                 putBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON, icon)
                 build()

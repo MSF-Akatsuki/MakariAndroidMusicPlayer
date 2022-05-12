@@ -151,6 +151,14 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
     override fun onLoadChildren(
         parentId: String,
+        result: Result<MutableList<MediaBrowserCompat.MediaItem>>,
+        options: Bundle
+    ) {
+        super.onLoadChildren(parentId, result, options)
+    }
+
+    override fun onLoadChildren(
+        parentId: String,
         result: Result<MutableList<MediaBrowserCompat.MediaItem>>
     ) {
 

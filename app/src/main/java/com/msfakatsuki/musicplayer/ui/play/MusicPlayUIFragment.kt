@@ -73,6 +73,7 @@ class MusicPlayUIFragment : Fragment() {
 
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.registerCallback(controllerCallbacks)
+
         
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
@@ -130,7 +131,6 @@ class MusicPlayUIFragment : Fragment() {
 
         Log.i("ICONSIZE",icon?.size.toString())
 
-
         Log.println(Log.INFO,"get_content",uri.toString())
         val mdc:MediaDescriptionCompat = MediaDescriptionCompat.Builder().run {
             setMediaUri(uri)
@@ -163,11 +163,23 @@ class MusicPlayUIFragment : Fragment() {
             metadata?.let{
                 viewModel.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
                 binding.progressBar.duration = viewModel.duration
+                binding.progressBar.invalidate()
+
                 val bitmap = it.getBitmap(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON)
                 bitmap?.let { bm ->
                     Glide.with(requireContext()).load(bm).into(binding.ivMediaIcon)
                 }?:Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
-                binding.progressBar.invalidate()
+
+                val title = it.getString(MediaMetadataCompat.METADATA_KEY_TITLE)
+                val artist = it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
+                val album = it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
+
+                binding.tvPlayUiTitle.text = title
+                binding.tvPlayUiArtist.text = artist
+                binding.tvPlayUiAlbum.text = album
+
+
+
             }
             super.onMetadataChanged(metadata)
         }
