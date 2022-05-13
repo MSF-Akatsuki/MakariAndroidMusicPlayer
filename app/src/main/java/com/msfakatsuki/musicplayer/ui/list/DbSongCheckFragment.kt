@@ -5,13 +5,10 @@ import android.view.*
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import androidx.fragment.app.activityViewModels
-import androidx.navigation.fragment.findNavController
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.R
 import com.msfakatsuki.musicplayer.databinding.FragmentDbSongCheckListBinding
-import com.msfakatsuki.musicplayer.ui.list.placeholder.PlaceholderContent
 
 /**
  * A fragment representing a list of Items.

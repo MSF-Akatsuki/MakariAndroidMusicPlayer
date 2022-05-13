@@ -56,10 +56,11 @@ class DbSongRecyclerViewAdapter(
             extra.putString("artist",it.artist)
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
-            Log.i("dbSRVAdap",it.localPath)
+            Log.i("dbSRVAdap",it.localMediaUri)
             MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
-                    setMediaUri(Uri.parse(it.localPath))
+                    setMediaUri(Uri.parse(it.localMediaUri))
+                    setIconUri(Uri.parse(it.localIconUri))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())

@@ -98,7 +98,8 @@ class MusicPlayUIFragment : Fragment() {
         binding.btnPlay.setOnClickListener(null)
         binding.btnStop.setOnClickListener(null)
         binding.btnPause.setOnClickListener(null)
-        binding.btnChooseSong.setOnClickListener(null)
+        binding.btnSkipNext.setOnClickListener(null)
+        binding.btnSkipPrev.setOnClickListener(null)
     }
 
     fun registerTransportControls() {
@@ -115,9 +116,16 @@ class MusicPlayUIFragment : Fragment() {
         binding.btnSkipNext.setOnClickListener {
             mediaController.transportControls.skipToNext()
         }
+        binding.btnSkipPrev.setOnClickListener {
+            mediaController.transportControls.skipToPrevious()
+        }
+
+        /*
         binding.btnChooseSong.setOnClickListener {
             getContent.launch("audio/*")
         }
+            */
+        */
     }
 
     val subscriptionCallback  = object : MediaBrowserCompat.SubscriptionCallback() {
@@ -153,45 +161,6 @@ class MusicPlayUIFragment : Fragment() {
     }
     val mmr = MediaMetadataRetriever()
 
-    val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
-        uri?:return@registerForActivityResult
-
-        val mediaController = MediaControllerCompat.getMediaController(requireActivity())
-        //mediaController.registerCallback((requireActivity() as MusicPlayUIActivity).controllerCallbacks)
-
-        mmr.setDataSource(requireContext(),uri)
-
-        val title = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-        val album = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-        val artist = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-        val icon  = mmr.embeddedPicture
-
-        Log.i("ICONSIZE",icon?.size.toString())
-
-        Log.println(Log.INFO,"get_content",uri.toString())
-        val mdc:MediaDescriptionCompat = MediaDescriptionCompat.Builder().run {
-            setMediaUri(uri)
-            setTitle(title)
-            setExtras(Bundle().apply {
-                putString("artist", artist)
-                putString("album", album)
-            })
-            build()
-        }
-        mediaController.addQueueItem(mdc)
-
-        uri?.let {
-            val item : RoomMusicItem?
-            item = RoomMusicItem(
-                id = 0, title = title?:"TITLE NULL",artist=artist?:"",album = album?:"", sha256 = "",localPath=it.path?:"", remoteLink = ""
-            )
-            val app = requireActivity().application as MusicApplication
-            Log.println(Log.INFO,"mpuif","adding item")
-            activity?.lifecycleScope?.launch(Dispatchers.IO) {
-                app.repository.insert(item)
-            }
-        }
-    }
 
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {

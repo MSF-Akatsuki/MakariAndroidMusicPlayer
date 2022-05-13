@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.FrameLayout
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.WorkerThread
 import androidx.documentfile.provider.DocumentFile
 import androidx.fragment.app.DialogFragment
@@ -43,6 +44,7 @@ class DbProcessedDialogFragment :  DialogFragment() {
     private val viewModel: MusicPlayUIViewModel by activityViewModels()
 
     private var docTree : DocumentFile?=null
+    private var iconUri : Uri?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,8 +70,6 @@ class DbProcessedDialogFragment :  DialogFragment() {
     }
 
 
-
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
 
         fun checkString(str:String) = if(str=="") null else str
@@ -86,12 +86,24 @@ class DbProcessedDialogFragment :  DialogFragment() {
             dismiss()
         }
 
+        binding.etIconPath.setOnClickListener {
+            getContent.launch("image/*")
+        }
+
     }
 
     override fun onResume() {
         super.onResume()
         val window: Window? = dialog?.window
         window?.setLayout(FrameLayout.LayoutParams.MATCH_PARENT,FrameLayout.LayoutParams.WRAP_CONTENT)
+    }
+
+
+    val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
+        uri?:return@registerForActivityResult
+        iconUri = uri
+        binding.etIconPath.text?.clear()
+        binding.etIconPath.text?.append(uri.path)
     }
 
     @WorkerThread
@@ -152,8 +164,8 @@ class DbProcessedDialogFragment :  DialogFragment() {
                      */
 
                     mediaUri.toString().let { path ->
-                        val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,"")
-                        Log.i("?sdvaew",roomMusicItem.localPath)
+                        val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,iconUri?.toString()?:"","")
+                        Log.i("?sdvaew",roomMusicItem.localMediaUri)
                         (activity.application as MusicApplication).repository.insert(item = roomMusicItem)
                     }
                 }

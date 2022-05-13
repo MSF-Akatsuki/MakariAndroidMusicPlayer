@@ -9,7 +9,7 @@ class MusicRoomRepository(private val musicDao: RoomMusicDao) {
 
     @WorkerThread
     fun insert(item : RoomMusicItem) {
-        val x = musicDao.checkListSizeOfLocalPath(item.localPath)
+        val x = musicDao.checkListSizeOfLocalPath(item.localMediaUri)
         if (x.size==0)
             musicDao.insert(item)
     }

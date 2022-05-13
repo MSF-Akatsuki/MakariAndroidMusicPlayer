@@ -154,11 +154,11 @@ class DbSongListFragment : Fragment() {
             extra.putString("artist",it.artist)
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
-            Log.i("dbSRVAdap",it.localPath)
-            Log.i("dbSRVAdap",Uri.parse(it.localPath).toIcon().uri.toString())
+            Log.i("dbSRVAdap",it.localMediaUri)
+            Log.i("dbSRVAdap",Uri.parse(it.localMediaUri).toIcon().uri.toString())
             MediaControllerCompat.getMediaController(requireActivity())?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
-                    setMediaUri(Uri.parse(it.localPath))
+                    setMediaUri(Uri.parse(it.localMediaUri))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())

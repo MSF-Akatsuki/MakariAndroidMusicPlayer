@@ -12,7 +12,7 @@
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:layout_marginBottom="20dp"
-        app:layout_constraintBottom_toTopOf="@+id/progress_bar"
+        app:layout_constraintBottom_toTopOf="@+id/media_controll_layout"
         app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
@@ -46,7 +46,7 @@
             android:id="@+id/iv_media_icon"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_constraintBottom_toTopOf="@+id/progress_bar" />
+            android:contentDescription="ALBUM_COVER" />
 
     </LinearLayout>
 
@@ -55,56 +55,68 @@
 
 
     <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="wrap_content"
+        android:id="@+id/media_controll_layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         >
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:layout_gravity="center"
-                android:id="@+id/btn_choose_song"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Button" />
-            <ImageButton
-                android:id="@+id/btn_skip_next"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/Com.Msfakatsuki.ImageButton.Borderless"
-                android:src="@drawable/ic_action_media_skip_next"/>
-        </LinearLayout>
+        <com.msfakatsuki.musicplayer.util.ProgressBarView
+            android:id="@+id/progress_bar"
+            android:layout_width="match_parent"
+            android:layout_height="6dp"
+            android:layout_marginHorizontal="8dp"
+            android:layout_marginBottom="15dp"
+            android:layout_marginTop="20dp"
+            app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:orientation="horizontal">
+
         <ImageButton
-            android:id="@+id/btn_pause"
-            android:layout_width="match_parent"
+            android:id="@+id/btn_skip_prev"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             style="@style/Com.Msfakatsuki.ImageButton.Borderless"
-            android:src="@drawable/ic_action_media_pause"  />
+            android:src="@drawable/ic_action_media_skip_previous"
+            android:contentDescription="BTN_SKIP_PREV" />
+
         <ImageButton
             android:id="@+id/btn_stop"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/Com.Msfakatsuki.ImageButton.Borderless"
-            android:src="@drawable/ic_action_media_stop" />
+            android:src="@drawable/ic_action_media_stop"
+            android:contentDescription="BTN_STOP" />
+
+        <ImageButton
+            android:id="@+id/btn_pause"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+            android:src="@drawable/ic_action_media_pause"
+            android:contentDescription="BTN_PAUSE" />
+
         <ImageButton
             android:id="@+id/btn_play"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             style="@style/Com.Msfakatsuki.ImageButton.Borderless"
-            android:src="@drawable/ic_action_media_play" />
+            android:src="@drawable/ic_action_media_play"
+            android:contentDescription="BTN_PLAY" />
 
+        <ImageButton
+            android:id="@+id/btn_skip_next"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+            android:src="@drawable/ic_action_media_skip_next"
+            android:contentDescription="BTN_SKIP_NEXT" />
 
 
     </LinearLayout>
@@ -114,13 +126,7 @@
 
     </LinearLayout>
 
-    <com.msfakatsuki.musicplayer.util.ProgressBarView
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="6dp"
-        android:layout_marginHorizontal="4dp"
-        android:layout_marginVertical="1dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
+
 
 
 

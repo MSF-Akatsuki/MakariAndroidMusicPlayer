@@ -12,7 +12,8 @@ data class RoomMusicItem(
     val artist: String,
     val album: String,
     val sha256: String,
-    val localPath: String,
+    val localMediaUri: String,
+    val localIconUri: String,
     val remoteLink: String
 )
 
@@ -63,7 +64,7 @@ interface RoomMusicDao {
     @Query("SELECT * FROM MusicMetaData WHERE album IN (:listAlbums)")
     fun getMusicByAlbumsList(listAlbums : Array<String>):List<RoomMusicItem>
 
-    @Query("SELECT COUNT(*) as size FROM MusicMetaData WHERE localPath == :location")
+    @Query("SELECT COUNT(*) as size FROM MusicMetaData WHERE localMediaUri == :location")
     fun checkListSizeOfLocalPath(location: String):RoomSizeItem
 
     @Query("SELECT distinct artist FROM MusicMetaData")

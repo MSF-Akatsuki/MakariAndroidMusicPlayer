@@ -8,18 +8,13 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import androidx.recyclerview.widget.RecyclerView
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import android.widget.CheckBox
-import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.msfakatsuki.musicplayer.R
 import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
-import com.msfakatsuki.musicplayer.database.music.SingleStringObject
 import com.msfakatsuki.musicplayer.databinding.FragmentDbSongCheckBinding
 
-import com.msfakatsuki.musicplayer.ui.list.placeholder.PlaceholderContent.PlaceholderItem
 /**
  * [RecyclerView.Adapter] that can display a [PlaceholderItem].
  * TODO: Replace the implementation with code for your data type.
@@ -56,10 +51,11 @@ class DbSongCheckboxRecyclerViewAdapter(
             extra.putString("artist",it.artist)
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
-            Log.i("dbSRVAdap",it.localPath)
+            Log.i("dbSRVAdap",it.localMediaUri)
             MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
-                    setMediaUri(Uri.parse(it.localPath))
+                    setMediaUri(Uri.parse(it.localMediaUri))
+                    setIconUri(Uri.parse(it.localIconUri))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())
