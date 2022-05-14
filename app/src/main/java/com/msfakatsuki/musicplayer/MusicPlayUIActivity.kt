@@ -1,6 +1,8 @@
 package com.msfakatsuki.musicplayer
 
+import android.Manifest
 import android.content.ComponentName
+import android.content.pm.PackageManager
 import android.media.AudioManager
 import android.media.MediaPlayer
 import android.media.browse.MediaBrowser
@@ -15,6 +17,9 @@ import android.util.Log
 import android.view.MenuItem
 import androidx.activity.viewModels
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.core.content.PackageManagerCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.NavHostFragment
@@ -65,6 +70,23 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
         binding.navView.setupWithNavController(localNavController)
 
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),1)
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        grantResults.forEach {
+            if (it!=PackageManager.PERMISSION_GRANTED) {
+                finish()
+                return@forEach
+            }
+        }
     }
 
     var OnBackPressedCallback: (() -> Boolean)?=null

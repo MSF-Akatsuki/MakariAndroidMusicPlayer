@@ -29,7 +29,6 @@ import java.util.*
 // TODO: Rename parameter arguments, choose names that match
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
 private const val ARG_DOCTREE_PATH = "dbprocessedDiag.arg.doctree.path"
-
 /**
  * A simple [Fragment] subclass.
  * Use the [DbProcessedDialogFragment.newInstance] factory method to
@@ -46,15 +45,21 @@ class DbProcessedDialogFragment :  DialogFragment() {
     private var docTree : DocumentFile?=null
     private var iconUri : Uri?=null
 
+    private var qType : Int?=null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
             try {
-                docTree = DocumentFile.fromTreeUri(requireActivity().application,Uri.parse(it.getString(
-                    ARG_DOCTREE_PATH
-                )))
-            } catch (e:Exception) {
-                Log.w("dbpdFrag","Dialog created with docTree null")
+                docTree = DocumentFile.fromTreeUri(
+                    requireActivity().application, Uri.parse(
+                        it.getString(
+                            ARG_DOCTREE_PATH
+                        )
+                    )
+                )
+            } catch (e: Exception) {
+                Log.w("dbpdFrag", "Dialog created with docTree null")
                 docTree = null
             }
         }
@@ -75,12 +80,18 @@ class DbProcessedDialogFragment :  DialogFragment() {
         fun checkString(str:String) = if(str=="") null else str
 
         super.onViewCreated(view, savedInstanceState)
+
         binding.btnConfirmDbp.setOnClickListener {
             val artist = binding.etArtistDbp.text.toString()
             val album = binding.etAlbumDbp.text.toString()
-            docTree?.let { docTree->
+            docTree?.let { docTree ->
                 requireActivity().lifecycleScope.launch(Dispatchers.IO) {
-                    searchAudioInPath(requireActivity(),docTree, checkString(artist),checkString(album))
+                    searchAudioInPath(
+                        requireActivity(),
+                        docTree,
+                        checkString(artist),
+                        checkString(album)
+                    )
                 }
             }
             dismiss()
@@ -165,7 +176,7 @@ class DbProcessedDialogFragment :  DialogFragment() {
 
                     mediaUri.toString().let { path ->
                         val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,iconUri?.toString()?:"","")
-                        Log.i("?sdvaew",roomMusicItem.localMediaUri)
+                        Log.i("?sdvaew",roomMusicItem.localMediaUri?:"NULL")
                         (activity.application as MusicApplication).repository.insert(item = roomMusicItem)
                     }
                 }
@@ -186,7 +197,8 @@ class DbProcessedDialogFragment :  DialogFragment() {
          * @param param2 Parameter 2.
          * @return A new instance of fragment DbProcessedDialogFragment.
          */
-        // TODO: Rename and change types and number of parameters
+
+
         @JvmStatic
         fun newInstance(docTreePath: String) =
             DbProcessedDialogFragment().apply {

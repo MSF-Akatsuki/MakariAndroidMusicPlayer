@@ -51,7 +51,7 @@ class DbSongCheckboxRecyclerViewAdapter(
             extra.putString("artist",it.artist)
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
-            Log.i("dbSRVAdap",it.localMediaUri)
+            Log.i("dbSRVAdap",it.localMediaUri?:"NULL")
             MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localMediaUri))

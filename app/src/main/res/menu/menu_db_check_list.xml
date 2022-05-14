@@ -8,4 +8,11 @@
         app:showAsAction="ifRoom"
         android:title="Add to playlist"/>
 
+    <item
+        android:id="@+id/action_modify_selected"
+        android:icon="@drawable/ic_modify_info"
+        app:showAsAction="never"
+        android:title="Modify Metadata"/>
+
+
 </menu>

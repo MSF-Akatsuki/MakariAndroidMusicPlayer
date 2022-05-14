@@ -14,6 +14,8 @@ class MusicFilterViewModel() : ViewModel() {
         MutableLiveData<List<SingleStringObject>>()
     }
 
+    var currentSongList : List<RoomMusicItem>?=null
+
     var isFiltered = false
 
     companion object{

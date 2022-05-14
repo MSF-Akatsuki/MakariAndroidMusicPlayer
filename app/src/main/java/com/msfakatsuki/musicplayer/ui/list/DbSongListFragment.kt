@@ -107,6 +107,7 @@ class DbSongListFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when(item.itemId) {
             R.id.action_switch -> {
+                navViewModel.currentSongList = adapter.currentList
                 findNavController().navigate(R.id.action_musicSelectFragment_to_dbSongCheckFragment)
                 true
             }
@@ -154,11 +155,12 @@ class DbSongListFragment : Fragment() {
             extra.putString("artist",it.artist)
             extra.putString("album",it.album)
             extra.putLong("id",it.id.toLong())
-            Log.i("dbSRVAdap",it.localMediaUri)
+            Log.i("dbSRVAdap",it.localMediaUri?:"NULL")
             Log.i("dbSRVAdap",Uri.parse(it.localMediaUri).toIcon().uri.toString())
             MediaControllerCompat.getMediaController(requireActivity())?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localMediaUri))
+                    setIconUri(Uri.parse(it.localIconUri))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())

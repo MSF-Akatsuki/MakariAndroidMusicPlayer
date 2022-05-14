@@ -1,6 +1,8 @@
 package com.msfakatsuki.musicplayer.database.music
 
 import android.net.Uri
+import android.os.Parcel
+import android.os.Parcelable
 import androidx.room.*
 import kotlinx.coroutines.flow.Flow
 
@@ -8,14 +10,51 @@ import kotlinx.coroutines.flow.Flow
 @Entity(tableName = "MusicMetaData")
 data class RoomMusicItem(
     @PrimaryKey(autoGenerate = true) val id: Int,
-    val title: String,
-    val artist: String,
-    val album: String,
-    val sha256: String,
-    val localMediaUri: String,
-    val localIconUri: String,
-    val remoteLink: String
-)
+    val title: String?,
+    val artist: String?,
+    val album: String?,
+    val sha256: String?,
+    val localMediaUri: String?,
+    val localIconUri: String?,
+    val remoteLink: String?
+):Parcelable {
+    constructor(parcel: Parcel) : this(
+        parcel.readInt(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString(),
+        parcel.readString()
+    ) {
+    }
+
+    override fun writeToParcel(parcel: Parcel, flags: Int) {
+        parcel.writeInt(id)
+        parcel.writeString(title)
+        parcel.writeString(artist)
+        parcel.writeString(album)
+        parcel.writeString(sha256)
+        parcel.writeString(localMediaUri)
+        parcel.writeString(localIconUri)
+        parcel.writeString(remoteLink)
+    }
+
+    override fun describeContents(): Int {
+        return 0
+    }
+
+    companion object CREATOR : Parcelable.Creator<RoomMusicItem> {
+        override fun createFromParcel(parcel: Parcel): RoomMusicItem {
+            return RoomMusicItem(parcel)
+        }
+
+        override fun newArray(size: Int): Array<RoomMusicItem?> {
+            return arrayOfNulls(size)
+        }
+    }
+}
 
 abstract class SingleStringObject(){
     abstract override fun toString(): String
@@ -26,6 +65,10 @@ abstract class SingleStringObject(){
         }
         else
             return super.equals(other)
+    }
+
+    override fun hashCode(): Int {
+        return javaClass.hashCode()
     }
 }
 
