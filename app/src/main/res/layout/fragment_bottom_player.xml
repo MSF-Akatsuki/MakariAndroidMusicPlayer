@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/bottom_player"
+    android:layout_width="match_parent"
+    android:layout_height="60dp"
+    android:orientation="vertical"
+    android:background="@color/white"
+    tools:context=".ui.play.BottomPlayerFragment">
+
+    <com.msfakatsuki.musicplayer.util.ProgressBarView
+        android:id="@+id/progress_bar"
+        android:layout_width="match_parent"
+        android:layout_height="7dp"
+        android:layout_marginHorizontal="8dp"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layoutDirection="rtl"
+        android:layout_marginHorizontal="4dp"
+        android:layout_marginBottom="10dp">
+
+        <LinearLayout
+            android:id="@+id/linearLayoutController"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr">
+
+            <ImageButton
+                android:id="@+id/btn_pause"
+                style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="BTN_PAUSE"
+                android:src="@drawable/ic_action_media_pause" />
+
+            <ImageButton
+                android:id="@+id/btn_play"
+                style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="BTN_PLAY"
+                android:src="@drawable/ic_action_media_play" />
+
+            <ImageButton
+                android:id="@+id/btn_skip_next"
+                style="@style/Com.Msfakatsuki.ImageButton.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:contentDescription="BTN_SKIP_NEXT"
+                android:src="@drawable/ic_action_media_skip_next" />
+
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal"
+            android:layoutDirection="ltr">
+
+            <ImageView
+                android:id="@+id/iv_media_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:contentDescription="ALBUM_COVER"
+                android:scaleType="fitStart"
+                android:src="@drawable/uniform_noise" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_play_ui_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:text="1223433" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_play_ui_artist"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="artist" />
+
+                    <TextView
+                        android:id="@+id/tv_play_ui_album"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:text="album" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

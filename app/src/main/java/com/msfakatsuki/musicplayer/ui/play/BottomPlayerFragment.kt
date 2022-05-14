@@ -1,67 +1,57 @@
 package com.msfakatsuki.musicplayer.ui.play
 
-import android.content.ComponentName
 import android.media.MediaMetadataRetriever
-import android.media.session.MediaController
-import android.net.Uri
-import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.provider.MediaStore
 import android.support.v4.media.MediaBrowserCompat
-import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
-import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
+import androidx.navigation.NavController
 import com.bumptech.glide.Glide
-import com.msfakatsuki.musicplayer.MusicApplication
-import com.msfakatsuki.musicplayer.MusicPlayUIActivity
 import com.msfakatsuki.musicplayer.MusicPlaybackService
 import com.msfakatsuki.musicplayer.R
-import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
-import com.msfakatsuki.musicplayer.databinding.MusicPlayUiFragmentBinding
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.msfakatsuki.musicplayer.databinding.FragmentBottomPlayerBinding
 
-class MusicPlayUIFragment : Fragment() {
+// TODO: Rename parameter arguments, choose names that match
+// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+private const val ARG_PARAM1 = "param1"
+private const val ARG_PARAM2 = "param2"
 
-    companion object {
-        fun newInstance() = MusicPlayUIFragment()
-    }
+/**
+ * A simple [Fragment] subclass.
+ * Use the [BottomPlayerFragment.newInstance] factory method to
+ * create an instance of this fragment.
+ */
+class BottomPlayerFragment : Fragment() {
 
+    private lateinit var binding : FragmentBottomPlayerBinding
     private val viewModel: MusicPlayUIViewModel by activityViewModels()
-    private var _binding: MusicPlayUiFragmentBinding?=null
-    protected val binding get() = _binding!!
 
-    private lateinit var mediaBrowser: MediaBrowserCompat
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        Log.println(Log.INFO,"mpuiFrag","OnCreateView")
+    ): View? {
 
-        _binding = MusicPlayUiFragmentBinding.inflate(inflater,container,false)
-        binding.progressBar.duration = viewModel.duration
-        binding.progressBar.currentPosition = viewModel.currentPosition
-
+        binding = FragmentBottomPlayerBinding.inflate(inflater,container,false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.println(Log.INFO,"mpuiFrag","OnViewCreated")
         val serviceConnectionObserver = Observer<Boolean> {
             if (it) {
                 registerTransportControls()
@@ -69,11 +59,10 @@ class MusicPlayUIFragment : Fragment() {
                 unregisterTransportControls()
             }
         }
-
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.registerCallback(controllerCallbacks)
 
-        
+
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
         viewModel.mediaBrowser.subscribe(
@@ -82,8 +71,6 @@ class MusicPlayUIFragment : Fragment() {
                 putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
             },subscriptionCallback
         )
-
-
     }
 
     override fun onDestroyView() {
@@ -96,31 +83,25 @@ class MusicPlayUIFragment : Fragment() {
 
     private fun unregisterTransportControls() {
         binding.btnPlay.setOnClickListener(null)
-        binding.btnStop.setOnClickListener(null)
         binding.btnPause.setOnClickListener(null)
         binding.btnSkipNext.setOnClickListener(null)
-        binding.btnSkipPrev.setOnClickListener(null)
     }
 
     fun registerTransportControls() {
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         binding.btnPlay.setOnClickListener {
-             mediaController.transportControls.play()
+            mediaController.transportControls.play()
         }
-        binding.btnStop.setOnClickListener {
-            mediaController.transportControls.stop()
-        }
+
         binding.btnPause.setOnClickListener {
             mediaController.transportControls.pause()
         }
         binding.btnSkipNext.setOnClickListener {
             mediaController.transportControls.skipToNext()
         }
-        binding.btnSkipPrev.setOnClickListener {
-            mediaController.transportControls.skipToPrevious()
-        }
-
     }
+
+    val mmr = MediaMetadataRetriever()
 
     val subscriptionCallback  = object : MediaBrowserCompat.SubscriptionCallback() {
 
@@ -151,11 +132,7 @@ class MusicPlayUIFragment : Fragment() {
                 Log.e("mpuiFrag",e.message?:"NO MESSAGE")
             }
         }
-
     }
-
-    val mmr = MediaMetadataRetriever()
-
 
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
@@ -203,4 +180,13 @@ class MusicPlayUIFragment : Fragment() {
 
     }
 
+    companion object {
+
+        @JvmStatic
+        fun newInstance() =
+            BottomPlayerFragment().apply {
+                arguments = Bundle().apply {
+                }
+            }
+    }
 }

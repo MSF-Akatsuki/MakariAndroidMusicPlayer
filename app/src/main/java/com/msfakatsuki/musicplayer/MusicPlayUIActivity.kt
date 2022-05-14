@@ -39,13 +39,11 @@ class MusicPlayUIActivity : AppCompatActivity() {
         get() = viewModel.mediaBrowser
         set(value) {viewModel.mediaBrowser=value}
 
-    private lateinit var binding:MusicPlayUiActivityBinding
+    private var _binding:MusicPlayUiActivityBinding?=null
+    private val binding:MusicPlayUiActivityBinding get() = _binding!!
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        binding = MusicPlayUiActivityBinding.inflate(layoutInflater)
-        setContentView(binding.root)
 
         mediaBrowser = MediaBrowserCompat(
             this,
@@ -61,14 +59,6 @@ class MusicPlayUIActivity : AppCompatActivity() {
                 viewModel.fileDbProcessFlag.value = false
             }
         }
-
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
-        val localNavController = navHostFragment.navController
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
-
-        setupActionBarWithNavController(localNavController,appBarConfiguration)
-
-        binding.navView.setupWithNavController(localNavController)
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE),1)
@@ -98,8 +88,11 @@ class MusicPlayUIActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
-        return findNavController(R.id.nav_music_play).navigateUp(appBarConfiguration = appBarConfiguration) || super.onSupportNavigateUp()
+        _binding?.let { it->
+            val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
+            return findNavController(R.id.nav_music_play).navigateUp(appBarConfiguration = appBarConfiguration) || super.onSupportNavigateUp()
+        }?: return super.onSupportNavigateUp()
+
     }
 
     /*
@@ -143,6 +136,17 @@ class MusicPlayUIActivity : AppCompatActivity() {
                 )
                 mediaController.registerCallback(controllerCallbacks)
                 MediaControllerCompat.setMediaController(this@MusicPlayUIActivity,mediaController)
+
+                _binding = MusicPlayUiActivityBinding.inflate(layoutInflater)
+                setContentView(binding.root)
+
+                val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_music_play) as NavHostFragment
+                val localNavController = navHostFragment.navController
+                val appBarConfiguration = AppBarConfiguration(setOf(R.id.musicSelectFragment,R.id.musicFilterFragment),binding.container)
+
+                setupActionBarWithNavController(localNavController,appBarConfiguration)
+
+                binding.navView.setupWithNavController(localNavController)
             }
 
             viewModel.isServiceConnected.value = true

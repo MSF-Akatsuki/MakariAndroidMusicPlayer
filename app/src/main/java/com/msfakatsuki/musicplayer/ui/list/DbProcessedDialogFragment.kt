@@ -164,15 +164,6 @@ class DbProcessedDialogFragment :  DialogFragment() {
                     val hasArtist = metaArtist!=null
 
                     var resultHex : String?=null
-                    /*
-                    contentResolver.openInputStream(mediaUri)?.use { stream->
-                        val bytes = stream.readBytes()
-                        val md = MessageDigest.getInstance("SHA-256")
-                        val digest = md.digest(bytes)
-                        resultHex = digest.fold("") { str, it -> str + "%02x".format(it) }
-                    }
-
-                     */
 
                     mediaUri.toString().let { path ->
                         val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,iconUri?.toString()?:"","")

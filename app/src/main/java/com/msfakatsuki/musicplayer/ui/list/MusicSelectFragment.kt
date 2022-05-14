@@ -51,11 +51,15 @@ class MusicSelectFragment : Fragment() {
             Log.println(Log.INFO,"mslctFrag","Observe vlco change:${it}")
         }
 
+        /*
         binding.btnSwitchPlay.setOnClickListener {
             findNavController().navigate(R.id.action_musicSelectFragment_to_playerViewPagerFragment)
         }
         binding.btnScanSongs.setOnClickListener {
             getContent.launch(null)
+        } */
+        binding.bottomPlayerFragment.setOnClickListener {
+            findNavController().navigate(R.id.action_musicSelectFragment_to_playerViewPagerFragment)
         }
     }
 

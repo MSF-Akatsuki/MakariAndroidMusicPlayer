@@ -174,7 +174,9 @@ class DbSongListFragment : Fragment() {
         val vh = binding.list.findViewHolderForAdapterPosition(aPosition) as DbSongRecyclerViewAdapter.ViewHolder?
         val bindedSongItem = vh?.bindedSongItem
 
-        Log.i("sacawc","Modify")
+        val dialog = bindedSongItem?.let { DbModifySingleDialogFragment.newInstance(it) }
+        dialog?.show(childFragmentManager,"DbModiftSDialog")
+
     }
 
     companion object {

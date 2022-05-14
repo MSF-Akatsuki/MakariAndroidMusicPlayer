@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.DialogInterface
 import android.net.Uri
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import com.msfakatsuki.musicplayer.MusicApplication
 import com.msfakatsuki.musicplayer.database.music.RoomMusicItem
+import com.msfakatsuki.musicplayer.databinding.FragmentDbModifySingleBinding
 import com.msfakatsuki.musicplayer.databinding.FragmentDbProcessedDialogBinding
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
 import kotlinx.coroutines.Dispatchers
@@ -26,26 +28,25 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_DOCTREE_PATH = "dbprocessedDiag.arg.doctree.path"
-private const val ARG_DB_IDLIST = "dbprocessedDiag.arg.db.idlist"
-private const val ARG_PARCEL_LIST = "dbprocessedDiag.arg.db.parcellist"
+
+private const val ARG_PARCELABLE = "dbprocessedDiag.arg.db.parcelable"
 /**
  * A simple [Fragment] subclass.
  * Use the [DbProcessedDialogFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class DbModifyDialogFragment :  DialogFragment() {
+class DbModifySingleDialogFragment :  DialogFragment() {
 
-    private lateinit var binding : FragmentDbProcessedDialogBinding
+    private lateinit var binding : FragmentDbModifySingleBinding
 
     private var iconUri : Uri?=null
 
-    private var parcelableList: ArrayList<RoomMusicItem>?=null
+    private var parcelable: RoomMusicItem?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            parcelableList = it.getParcelableArrayList<RoomMusicItem>(ARG_PARCEL_LIST)
+            parcelable = it.getParcelable<RoomMusicItem>(ARG_PARCELABLE)
         }
     }
 
@@ -54,7 +55,7 @@ class DbModifyDialogFragment :  DialogFragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentDbProcessedDialogBinding.inflate(inflater,container,false)
+        binding = FragmentDbModifySingleBinding.inflate(inflater,container,false)
         return binding.root
     }
 
@@ -65,19 +66,26 @@ class DbModifyDialogFragment :  DialogFragment() {
         fun checkString(str:String) = if(str=="") null else str
 
         super.onViewCreated(view, savedInstanceState)
+
+        binding.etTitleDbp.text?.append(parcelable?.title)
+        binding.etArtistDbp.text?.append(parcelable?.artist)
+        binding.etAlbumDbp.text?.append(parcelable?.album)
+
         binding.btnConfirmDbp.setOnClickListener {
+            val title = binding.etTitleDbp.text.toString()
             val artist = binding.etArtistDbp.text.toString()
             val album = binding.etAlbumDbp.text.toString()
             requireActivity().lifecycleScope.launch(Dispatchers.IO) {
-                modifyDatabase(
+                modifyDatabaseSingle(
                     requireActivity(),
-                    checkString(artist),
-                    checkString(album)
+                    title,
+                    artist,
+                    album,
+                    iconUri?.toString()?:""
                 )
             }
             dismiss()
         }
-
 
         binding.etIconPath.setOnClickListener {
             getContent.launch("image/*")
@@ -87,16 +95,16 @@ class DbModifyDialogFragment :  DialogFragment() {
     }
 
     @WorkerThread
-    private fun modifyDatabase(activity:Activity, pArtist : String?, pAlbum: String?) {
-        parcelableList?.forEach { item->
+    private fun modifyDatabaseSingle(activity:Activity,pTitle:String, pArtist : String, pAlbum: String, pIconUri: String) {
+        parcelable?.let { item->
             val newItem = RoomMusicItem(
                 id = item.id,
-                title = item.title,
-                artist = pArtist?:item.artist,
-                album = pAlbum?:item.album,
+                title = pTitle,
+                artist = pArtist,
+                album = pAlbum,
                 sha256 = item.sha256,
                 localMediaUri = item.localMediaUri,
-                localIconUri = item.localIconUri,
+                localIconUri = pIconUri,
                 remoteLink = item.remoteLink
             )
             val application = activity.application as MusicApplication
@@ -131,10 +139,10 @@ class DbModifyDialogFragment :  DialogFragment() {
     companion object {
 
         @JvmStatic
-        fun newInstance(dbIdList: ArrayList<RoomMusicItem>) =
-            DbModifyDialogFragment().apply {
+        fun newInstance(dbParcelable: RoomMusicItem) =
+            DbModifySingleDialogFragment().apply {
                 arguments = Bundle().apply {
-                    putParcelableArrayList(ARG_PARCEL_LIST,dbIdList)
+                    putParcelable(ARG_PARCELABLE,dbParcelable)
                 }
             }
     }

@@ -12,8 +12,9 @@
         android:name="com.msfakatsuki.musicplayer.ui.list.DbSongListFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout3" />
+        app:layout_constraintBottom_toTopOf="@+id/bottom_player_fragment" />
 
+    <!--
     <LinearLayout
         android:id="@+id/linearLayout3"
         android:layout_width="match_parent"
@@ -45,7 +46,13 @@
             android:layout_weight="1"
             android:text="To Filter"/>
 
-    </LinearLayout>
+    </LinearLayout> -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/bottom_player_fragment"
+        android:name="com.msfakatsuki.musicplayer.ui.play.BottomPlayerFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@+id/fcv_music_select" />
 
 
 
