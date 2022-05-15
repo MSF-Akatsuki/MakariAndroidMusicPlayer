@@ -75,13 +75,14 @@ class DbModifySingleDialogFragment :  DialogFragment() {
             val title = binding.etTitleDbp.text.toString()
             val artist = binding.etArtistDbp.text.toString()
             val album = binding.etAlbumDbp.text.toString()
-            requireActivity().lifecycleScope.launch(Dispatchers.IO) {
+            val activity = requireActivity()
+            activity.lifecycleScope.launch(Dispatchers.IO) {
                 modifyDatabaseSingle(
-                    requireActivity(),
+                    activity,
                     title,
                     artist,
                     album,
-                    iconUri?.toString()?:""
+                    iconUri?.toString()
                 )
             }
             dismiss()
@@ -95,7 +96,7 @@ class DbModifySingleDialogFragment :  DialogFragment() {
     }
 
     @WorkerThread
-    private fun modifyDatabaseSingle(activity:Activity,pTitle:String, pArtist : String, pAlbum: String, pIconUri: String) {
+    private fun modifyDatabaseSingle(activity:Activity,pTitle:String, pArtist : String, pAlbum: String, pIconUri: String?) {
         parcelable?.let { item->
             val newItem = RoomMusicItem(
                 id = item.id,

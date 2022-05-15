@@ -1,8 +1,10 @@
 package com.msfakatsuki.musicplayer.ui.play
 
+import android.content.Context
 import android.media.MediaMetadataRetriever
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
@@ -14,7 +16,6 @@ import android.view.ViewGroup
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
 import com.bumptech.glide.Glide
 import com.msfakatsuki.musicplayer.MusicPlaybackService
 import com.msfakatsuki.musicplayer.R
@@ -52,12 +53,16 @@ class BottomPlayerFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        Glide.with(requireActivity()).load(getDrawable(requireActivity(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+
         val serviceConnectionObserver = Observer<Boolean> {
             if (it) {
                 registerTransportControls()
             } else {
                 unregisterTransportControls()
             }
+
         }
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.registerCallback(controllerCallbacks)
@@ -65,12 +70,36 @@ class BottomPlayerFragment : Fragment() {
 
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
+        viewModel.songDescription.observe(viewLifecycleOwner){ metadata ->
+            metadata?.let {
+                onMetadataChanged(metadata)
+            }
+        }
+
+    }
+
+    override fun onStart() {
+        super.onStart()
         viewModel.mediaBrowser.subscribe(
             viewModel.mediaBrowser.root,
             Bundle().apply {
                 putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
-            },subscriptionCallback
+            },subscriptionBPCallback
         )
+    }
+
+    override fun onStop() {
+        super.onStop()
+        viewModel.mediaBrowser.unsubscribe(
+            viewModel.mediaBrowser.root)
+    }
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+    }
+
+    override fun onDetach() {
+        super.onDetach()
     }
 
     override fun onDestroyView() {
@@ -101,9 +130,18 @@ class BottomPlayerFragment : Fragment() {
         }
     }
 
+    fun shortenString(str: String?, ub: Int) : String? {
+        return if (str!=null) {
+            if (str.length>ub)
+                str.subSequence(0,ub).padEnd(3,'.').toString()
+            else
+                str
+        } else null
+    }
+
     val mmr = MediaMetadataRetriever()
 
-    val subscriptionCallback  = object : MediaBrowserCompat.SubscriptionCallback() {
+    private val subscriptionBPCallback  = object : MediaBrowserCompat.SubscriptionCallback() {
 
         override fun onChildrenLoaded(
             parentId: String,
@@ -111,11 +149,61 @@ class BottomPlayerFragment : Fragment() {
             options: Bundle
         ) {
             super.onChildrenLoaded(parentId, children, options)
+
+        }
+
+        override fun onChildrenLoaded(
+            parentId: String,
+            children: MutableList<MediaBrowserCompat.MediaItem>
+        ) {
+            super.onChildrenLoaded(parentId, children)
+        }
+
+        override fun onError(parentId: String) {
+            super.onError(parentId)
+            Log.e("bpFrag","error")
+        }
+
+        override fun onError(parentId: String, options: Bundle) {
+            super.onError(parentId, options)
+            Log.e("bpFrag","error")
+        }
+    }
+
+    fun observeOnDescriptionChange(description:MediaDescriptionCompat) {
+        try {
+            binding.tvPlayUiAlbum.text = shortenString( description.extras?.getString("album"), 7 )
+            binding.tvPlayUiArtist.text = shortenString( description.extras?.getString("artist"), 7)
+            binding.tvPlayUiTitle.text = shortenString( description.title.toString(), 10)
+            description.iconUri?.let {
+                Glide.with(requireActivity()).asBitmap().load(description.iconUri).into(binding.ivMediaIcon)
+            }?: kotlin.run {
+                mmr.setDataSource(requireActivity(),description.mediaUri)
+                val pic = mmr.embeddedPicture?:ByteArray(0)
+                if (pic.isNotEmpty()) {
+                    Glide.with(requireActivity()).asBitmap().load(pic).into(binding.ivMediaIcon)
+                } else {
+                    Glide.with(requireActivity()).load(getDrawable(requireActivity(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+                }
+            }
+
+        }catch (e:Exception) {
+            Log.e("mpuiFrag",e.message?:"NO MESSAGE")
+        }
+    }
+
+    fun onMetadataChanged(metadata: MediaMetadataCompat?) {
+        Log.i("oMDcgd","onMetadataChanged ${metadata.toString()}")
+        metadata?.let{
+            viewModel.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
+            binding.progressBar.duration = viewModel.duration
+            binding.progressBar.invalidate()
+
             try {
-                val description = children[0].description
-                binding.tvPlayUiAlbum.text = description.extras?.getString("album")
-                binding.tvPlayUiArtist.text = description.extras?.getString("artist")
-                binding.tvPlayUiTitle.text = description.title
+                val description = it.description
+                binding.tvPlayUiAlbum.text = shortenString( it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM), 7)
+                binding.tvPlayUiArtist.text = shortenString( it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST), 7)
+                binding.tvPlayUiTitle.text = shortenString(description.title.toString(), 10)
                 description.iconUri?.let {
                     Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
                 }?: kotlin.run {
@@ -131,41 +219,13 @@ class BottomPlayerFragment : Fragment() {
             }catch (e:Exception) {
                 Log.e("mpuiFrag",e.message?:"NO MESSAGE")
             }
+
         }
     }
 
-
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-            Log.i("oMDcgd","onMetadataChanged ${metadata.toString()}")
-            metadata?.let{
-                viewModel.duration = it.getLong(MediaMetadataCompat.METADATA_KEY_DURATION) as Long
-                binding.progressBar.duration = viewModel.duration
-                binding.progressBar.invalidate()
 
-                try {
-                    val description = it.description
-                    binding.tvPlayUiAlbum.text = it.getString(MediaMetadataCompat.METADATA_KEY_ALBUM)
-                    binding.tvPlayUiArtist.text = it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST)
-                    binding.tvPlayUiTitle.text = description.title
-                    description.iconUri?.let {
-                        Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
-                    }?: kotlin.run {
-                        mmr.setDataSource(requireContext(),description.mediaUri)
-                        val pic = mmr.embeddedPicture?:ByteArray(0)
-                        if (pic.isNotEmpty()) {
-                            Glide.with(requireContext()).load(pic).into(binding.ivMediaIcon)
-                        } else {
-                            Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
-                        }
-                    }
-
-                }catch (e:Exception) {
-                    Log.e("mpuiFrag",e.message?:"NO MESSAGE")
-                }
-
-            }
-            super.onMetadataChanged(metadata)
         }
 
         override fun onPlaybackStateChanged(state: PlaybackStateCompat?) {

@@ -6,31 +6,12 @@
     app:startDestination="@id/nav_db_list">
 
 
-    <fragment
-        android:id="@+id/musicPlayUIFragment"
-        android:name="com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment"
-        android:label="music_play_ui_fragment"
-        tools:layout="@layout/music_play_ui_fragment" >
-        <action
-            android:id="@+id/action_musicPlayUIFragment_to_songItemFragment2"
-            app:destination="@id/songItemFragment2" />
-    </fragment>
-
-
-
-
-    <fragment
-        android:id="@+id/songItemFragment2"
-        android:name="com.msfakatsuki.musicplayer.ui.play.SongItemFragment"
-        android:label="fragment_item_list"
-        tools:layout="@layout/fragment_item_list" />
-
     <navigation android:id="@+id/nav_db_list"
         app:startDestination="@id/musicSelectFragment">
         <fragment
             android:id="@+id/musicSelectFragment"
             android:name="com.msfakatsuki.musicplayer.ui.list.MusicSelectFragment"
-            android:label="fragment_music_select"
+            android:label="Select"
             tools:layout="@layout/fragment_dbsong_list">
             <action
                 android:id="@+id/action_musicSelectFragment_to_playerViewPagerFragment"
@@ -45,7 +26,7 @@
         <fragment
             android:id="@+id/musicFilterFragment"
             android:name="com.msfakatsuki.musicplayer.ui.list.MusicFilterFragment"
-            android:label="fragment_music_filter"
+            android:label="Filter"
             tools:layout="@layout/fragment_music_filter" >
             <action
                 android:id="@+id/action_musicFilterFragment_to_musicSelectFragment"

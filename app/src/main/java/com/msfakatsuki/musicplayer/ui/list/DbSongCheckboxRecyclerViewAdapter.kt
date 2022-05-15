@@ -55,7 +55,7 @@ class DbSongCheckboxRecyclerViewAdapter(
             MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localMediaUri))
-                    setIconUri(Uri.parse(it.localIconUri))
+                    setIconUri(Uri.parse(it.localIconUri?:""))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())

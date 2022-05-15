@@ -64,7 +64,7 @@ class MusicSelectFragment : Fragment() {
     }
 
     val getContent = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { treeUri: Uri?->
-        treeUri?.let { treeUri
+        treeUri?.let { treeUri->
             val contentResolver = requireActivity().contentResolver
             val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION

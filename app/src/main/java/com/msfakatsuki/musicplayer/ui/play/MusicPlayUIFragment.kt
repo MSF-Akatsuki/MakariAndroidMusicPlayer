@@ -76,6 +76,7 @@ class MusicPlayUIFragment : Fragment() {
         
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
+
         viewModel.mediaBrowser.subscribe(
             viewModel.mediaBrowser.root,
             Bundle().apply {
@@ -136,12 +137,12 @@ class MusicPlayUIFragment : Fragment() {
                 binding.tvPlayUiArtist.text = description.extras?.getString("artist")
                 binding.tvPlayUiTitle.text = description.title
                 description.iconUri?.let {
-                    Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
+                    Glide.with(requireContext()).asBitmap().load(description.iconUri).into(binding.ivMediaIcon)
                 }?: kotlin.run {
                     mmr.setDataSource(requireContext(),description.mediaUri)
                     val pic = mmr.embeddedPicture?:ByteArray(0)
                     if (pic.isNotEmpty()) {
-                        Glide.with(requireContext()).load(pic).into(binding.ivMediaIcon)
+                        Glide.with(requireContext()).asBitmap().load(pic).into(binding.ivMediaIcon)
                     } else {
                         Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
                     }

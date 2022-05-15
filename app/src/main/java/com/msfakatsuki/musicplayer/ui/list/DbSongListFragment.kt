@@ -1,11 +1,13 @@
 package com.msfakatsuki.musicplayer.ui.list
 
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.util.Log
 import android.view.*
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.graphics.drawable.toIcon
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
@@ -115,9 +117,27 @@ class DbSongListFragment : Fragment() {
                 adapter.addAllToPlaylist()
                 true
             }
+            R.id.action_scan_directory -> {
+                getContent.launch(null)
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
+
+    val getContent = registerForActivityResult(ActivityResultContracts.OpenDocumentTree()) { treeUri: Uri?->
+        treeUri?.let { treeUri
+            val contentResolver = requireActivity().contentResolver
+            val takeFlags: Int = Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+// Check for the freshest data.
+            contentResolver.takePersistableUriPermission(treeUri, takeFlags)
+            DbProcessedDialogFragment.newInstance(treeUri.toString()).show(
+                childFragmentManager,"dbfixDialog"
+            )
+        }
+    }
+
 
     override fun onCreateContextMenu(
         menu: ContextMenu,
@@ -160,7 +180,7 @@ class DbSongListFragment : Fragment() {
             MediaControllerCompat.getMediaController(requireActivity())?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localMediaUri))
-                    setIconUri(Uri.parse(it.localIconUri))
+                    it.localIconUri?.let {icon-> setIconUri(Uri.parse(icon))}?:setIconUri(null)
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())

@@ -19,6 +19,8 @@ import android.util.Log
 import com.msfakatsuki.musicplayer.util.DetailedMediaPlayer
 import kotlinx.coroutines.*
 import java.lang.Runnable
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 
 class MusicPlaybackService : MediaBrowserServiceCompat() {
@@ -163,7 +165,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             MAK_MUSIC_ROOT_ID -> {
                 if (options.getBoolean(HINT_IS_PLAYER)){
                     result.sendResult(
-                        if(playlistSize>0)
+                        if( playlistSize > 0 )
                             mutableListOf(MediaBrowserCompat.MediaItem(mSongPlayList[songId % playlistSize].description, MediaBrowserCompat.MediaItem.FLAG_PLAYABLE))
                         else
                             null
@@ -263,6 +265,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
             super.onStop()
         }
 
+
         override fun onAddQueueItem(description: MediaDescriptionCompat?) {
             Log.println(Log.INFO,"mpbService","onAddQueueItem")
 
@@ -280,8 +283,15 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
             mSongPlayList.add(MediaSessionCompat.QueueItem(description, id) )
             mediaSession?.setQueue(mSongPlayList)
-            // mediaSession?.setPlaybackState(stateBuilder.setState(0,13, 1.0F).build())
-            Log.println(Log.INFO,"mpbService","Nothing. playListSize is ${playlistSize}  ${mSongPlayList.size}")
+            if (playlistSize == 1) {
+                mMediaPlayer?:run{ mMediaPlayer = createMediaPlayer() }
+                mMediaPlayer?.setDataSourceByDescription(baseContext,mSongPlayList[0].description)
+                songId = 0
+            }
+
+            if(playBackType == PLAYBACK_SHUFFLED) {
+                songId += Random.nextInt(16384) * playlistSize
+            }
 
             super.onAddQueueItem(description)
         }
@@ -309,6 +319,17 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
         override fun onRemoveQueueItem(description: MediaDescriptionCompat?) {
             super.onRemoveQueueItem(description)
+        }
+
+        override fun onSetRepeatMode(repeatMode: Int) {
+            super.onSetRepeatMode(repeatMode)
+            if (playBackType != repeatMode) {
+                playBackType = repeatMode
+                songId %= playlistSize
+                if (repeatMode == PLAYBACK_SHUFFLED){
+                    songId += Random.nextInt(16384) * playlistSize
+                }
+            }
         }
 
         override fun onCustomAction(action: String?, extras: Bundle?) {
@@ -418,18 +439,20 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
         mpStatePrepare = nextState
     }
 
-    data class MakSongData(
-        public val path: String,
-        public val title: String?,
-        public val artist: String?,
-        public val album: String?
-    )
 
     val onPlayerMetaLoadedListener = object : DetailedMediaPlayer.OnMetadataLoadedListener() {
         override fun onMetadataLoaded(mp: DetailedMediaPlayer) {
             super.onMetadataLoaded(mp)
             if (mp.statePrepare == DetailedMediaPlayer.STATE_PREPARED) {
                 updateMetadata(mp)
+            } else {
+                mp.let { player->
+                    val builder = player.meta?.let{ meta-> MediaMetadataCompat.Builder(meta) }
+                    builder?.let { it->
+                        it.putLong(MediaMetadataCompat.METADATA_KEY_DURATION,0)
+                        mediaSession?.setMetadata(it.build())
+                    }
+                }
             }
         }
     }

@@ -166,7 +166,7 @@ class DbProcessedDialogFragment :  DialogFragment() {
                     var resultHex : String?=null
 
                     mediaUri.toString().let { path ->
-                        val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,iconUri?.toString()?:"","")
+                        val roomMusicItem = RoomMusicItem(0,title,artist,album,resultHex?:"",path,iconUri?.toString(),null)
                         Log.i("?sdvaew",roomMusicItem.localMediaUri?:"NULL")
                         (activity.application as MusicApplication).repository.insert(item = roomMusicItem)
                     }

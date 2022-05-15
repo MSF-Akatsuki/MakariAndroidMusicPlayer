@@ -46,11 +46,11 @@ class DbSongRecyclerViewAdapter(
 
     fun addAllToPlaylist() {
         this.currentList.forEach {
-            addItemToPlatlist(it)
+            addItemToPlayList(it)
         }
     }
 
-    fun addItemToPlatlist(item:RoomMusicItem?) {
+    fun addItemToPlayList(item:RoomMusicItem?) {
         item?.let {
             val extra = Bundle()
             extra.putString("artist",it.artist)
@@ -60,7 +60,7 @@ class DbSongRecyclerViewAdapter(
             MediaControllerCompat.getMediaController(parent.context as Activity)?.addQueueItem(
                 MediaDescriptionCompat.Builder().run {
                     setMediaUri(Uri.parse(it.localMediaUri))
-                    setIconUri(Uri.parse(it.localIconUri))
+                    setIconUri(Uri.parse(it.localIconUri?:""))
                     setTitle(it.title)
                     setExtras(extra)
                     setMediaId(it.id.toString())
@@ -90,7 +90,7 @@ class DbSongRecyclerViewAdapter(
         }
 
         public fun addToPlaylist() {
-            this@DbSongRecyclerViewAdapter.addItemToPlatlist(bindedSongItem)
+            this@DbSongRecyclerViewAdapter.addItemToPlayList(bindedSongItem)
         }
 
 

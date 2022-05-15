@@ -1,6 +1,8 @@
 package com.msfakatsuki.musicplayer.ui.play
 
 import android.support.v4.media.MediaBrowserCompat
+import android.support.v4.media.MediaDescriptionCompat
+import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,6 +14,10 @@ class MusicPlayUIViewModel : ViewModel() {
 
     val SongPlayingList : MutableLiveData<List<MediaSessionCompat.QueueItem>> by lazy {
         MutableLiveData<List<MediaSessionCompat.QueueItem>>()
+    }
+
+    val songDescription : MutableLiveData<MediaMetadataCompat> by lazy {
+        MutableLiveData<MediaMetadataCompat>()
     }
 
     var duration : Long = 0

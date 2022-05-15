@@ -96,7 +96,7 @@ class DbModifyDialogFragment :  DialogFragment() {
                 album = pAlbum?:item.album,
                 sha256 = item.sha256,
                 localMediaUri = item.localMediaUri,
-                localIconUri = item.localIconUri,
+                localIconUri = iconUri?.toString(),
                 remoteLink = item.remoteLink
             )
             val application = activity.application as MusicApplication

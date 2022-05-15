@@ -29,6 +29,8 @@ import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIFragment
 import com.msfakatsuki.musicplayer.ui.play.MusicPlayUIViewModel
 import com.msfakatsuki.musicplayer.ui.play.PlayerViewPagerFragment
 import com.msfakatsuki.musicplayer.ui.play.SongItemFragment
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MusicPlayUIActivity : AppCompatActivity() {
 
@@ -150,7 +152,12 @@ class MusicPlayUIActivity : AppCompatActivity() {
             }
 
             viewModel.isServiceConnected.value = true
-            mediaBrowser.subscribe(mediaBrowser.root,subscriptionCallback)
+            mediaBrowser.subscribe(
+                mediaBrowser.root,
+                Bundle().apply {
+                    putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
+                },
+                subscriptionCallback)
             super.onConnected()
         }
 
@@ -173,8 +180,7 @@ class MusicPlayUIActivity : AppCompatActivity() {
 
     private var controllerCallbacks = object  : MediaControllerCompat.Callback() {
         override fun onMetadataChanged(metadata: MediaMetadataCompat?) {
-
-
+            viewModel.songDescription.value = metadata
             super.onMetadataChanged(metadata)
         }
 
@@ -197,6 +203,30 @@ class MusicPlayUIActivity : AppCompatActivity() {
             children: MutableList<MediaBrowserCompat.MediaItem>
         ) {
             super.onChildrenLoaded(parentId, children)
+            if (children.size>0) {
+                val description = children[0].description
+                val uri = description.mediaUri!!
+
+                val title: String = (description.title ?: "") as String
+                val album = description.extras?.getString("album", "")
+                val artist = description.extras?.getString("artist", "")
+                val mediaUri = description.mediaUri?.toString()
+                val iconUri = description.iconUri?.toString()
+
+
+
+                viewModel.songDescription.value = MediaMetadataCompat.Builder().run {
+                        putString(MediaMetadataCompat.METADATA_KEY_ALBUM, album)
+                        putString(MediaMetadataCompat.METADATA_KEY_ARTIST, artist)
+                        putString(MediaMetadataCompat.METADATA_KEY_TITLE, title)
+                        putString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI,mediaUri)
+                        putString(MediaMetadataCompat.METADATA_KEY_DISPLAY_ICON_URI,iconUri)
+                        build()
+                    }
+
+            }
+            else
+                viewModel.songDescription.value = null
         }
 
         override fun onChildrenLoaded(
