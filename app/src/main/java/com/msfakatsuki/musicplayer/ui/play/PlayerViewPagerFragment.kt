@@ -2,10 +2,9 @@ package com.msfakatsuki.musicplayer.ui.play
 
 import android.content.Context
 import android.os.Bundle
+import android.support.v4.media.session.MediaControllerCompat
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentPagerAdapter
 import com.msfakatsuki.musicplayer.MusicPlayUIActivity
@@ -25,8 +24,25 @@ class PlayerViewPagerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
+        setHasOptionsMenu(true)
         binding = FragmentPlayerViewPagerBinding.inflate(inflater,container,false)
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_pager,menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_delete_all-> {
+                val mediaController = MediaControllerCompat.getMediaController(requireActivity())
+                mediaController.transportControls.sendCustomAction("CA_REMOVE_ALL_FROM_QUEUE",null)
+                true
+            }
+            else->super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

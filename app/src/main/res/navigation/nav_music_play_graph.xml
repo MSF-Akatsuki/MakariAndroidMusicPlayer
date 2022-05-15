@@ -38,7 +38,7 @@
         <fragment
             android:id="@+id/dbSongCheckFragment"
             android:name="com.msfakatsuki.musicplayer.ui.list.DbSongCheckFragment"
-            android:label="fragment_db_song_check_list"
+            android:label="Pick"
             tools:layout="@layout/fragment_db_song_check_list" >
             <action
                 android:id="@+id/action_dbSongCheckFragment_to_musicSelectFragment"
@@ -48,7 +48,7 @@
     <fragment
         android:id="@+id/playerViewPagerFragment"
         android:name="com.msfakatsuki.musicplayer.ui.play.PlayerViewPagerFragment"
-        android:label="fragment_player_view_pager"
+        android:label="Player"
         tools:layout="@layout/fragment_player_view_pager" />
 
 </navigation>

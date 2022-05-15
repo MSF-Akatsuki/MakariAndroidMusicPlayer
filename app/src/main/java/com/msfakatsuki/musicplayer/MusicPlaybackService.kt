@@ -334,6 +334,7 @@ class MusicPlaybackService : MediaBrowserServiceCompat() {
 
         override fun onCustomAction(action: String?, extras: Bundle?) {
             if (action == "CA_REMOVE_ALL_FROM_QUEUE") {
+                mMediaPlayer=null
                 mSongPlayList.removeIf { true }
                 mMediaIdSet.removeIf { true }
                 mediaSession?.setQueue(mSongPlayList)

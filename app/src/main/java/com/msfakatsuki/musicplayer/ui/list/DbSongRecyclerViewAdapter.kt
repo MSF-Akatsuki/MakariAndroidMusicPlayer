@@ -72,8 +72,9 @@ class DbSongRecyclerViewAdapter(
 
     inner class ViewHolder(binding: FragmentDbsongItemBinding,val parent: ViewGroup) :
         RecyclerView.ViewHolder(binding.root) {
-        val idView: TextView = binding.itemNumber
-        val contentView: TextView = binding.content
+        val idView: TextView = binding.title
+        val artistTextView: TextView = binding.artist
+        val albumTextView: TextView = binding.album
         val dbSongLayout = binding.layoutDbsong
         var bindedSongItem : RoomMusicItem?=null
 
@@ -86,7 +87,8 @@ class DbSongRecyclerViewAdapter(
         fun bind(dbSongItem : RoomMusicItem) {
             bindedSongItem = dbSongItem
             idView.text = dbSongItem.title
-            contentView.text = dbSongItem.artist
+            artistTextView.text = dbSongItem.artist
+            albumTextView.text = dbSongItem.album
         }
 
         public fun addToPlaylist() {
@@ -97,7 +99,7 @@ class DbSongRecyclerViewAdapter(
 
 
         override fun toString(): String {
-            return super.toString() + " '" + contentView.text + "'"
+            return super.toString() + " '" + artistTextView.text + "'"
         }
 
     }

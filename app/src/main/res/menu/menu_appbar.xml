@@ -16,4 +16,8 @@
         android:id="@+id/action_scan_directory"
         app:showAsAction="never"
         android:title="Scan Directory"/>
+    <item
+        android:id="@+id/action_clear_filter"
+        app:showAsAction="never"
+        android:title="Clear Filter"/>
 </menu>

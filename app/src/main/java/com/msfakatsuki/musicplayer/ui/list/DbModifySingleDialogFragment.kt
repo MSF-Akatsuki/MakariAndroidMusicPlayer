@@ -2,6 +2,7 @@ package com.msfakatsuki.musicplayer.ui.list
 
 import android.app.Activity
 import android.content.DialogInterface
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
@@ -126,6 +127,7 @@ class DbModifySingleDialogFragment :  DialogFragment() {
 
     val getContent = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri?->
         uri?:return@registerForActivityResult
+
         iconUri = uri
         binding.etIconPath.text?.clear()
         binding.etIconPath.text?.append(uri.path)

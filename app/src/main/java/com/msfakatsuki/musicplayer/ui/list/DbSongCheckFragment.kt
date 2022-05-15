@@ -50,6 +50,7 @@ class DbSongCheckFragment : Fragment() {
         return when(item.itemId) {
             R.id.action_add_selected_to_playlist -> {
                 adapter.addSelectedToPlaylist()
+                findNavController().navigateUp()
                 true
             }
             R.id.action_modify_selected -> {

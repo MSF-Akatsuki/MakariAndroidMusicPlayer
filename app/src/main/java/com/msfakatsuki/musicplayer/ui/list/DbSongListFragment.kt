@@ -96,7 +96,6 @@ class DbSongListFragment : Fragment() {
             }
         }
 
-
         registerForContextMenu(binding.list)
         return view
     }
@@ -121,7 +120,44 @@ class DbSongListFragment : Fragment() {
                 getContent.launch(null)
                 true
             }
+            R.id.action_clear_filter -> {
+                navViewModel.isFiltered = false
+                navViewModel.displayState = MusicFilterViewModel.DO_NOTHING
+                listViewModel.songList.value.let { itemList ->
+                    if (navViewModel.displayState==MusicFilterViewModel.DO_NOTHING)
+                        itemList?.let { this@DbSongListFragment.adapter.submitList(it) }
+                }
+                true
+            }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        navViewModel.selectedArtistList.value.let { itemList ->
+            if (navViewModel.isFiltered && itemList != null && navViewModel.displayState==MusicFilterViewModel.DISPLAY_ARTIST_LIST) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val application = requireActivity().application as MusicApplication
+                    val strList = Array<String>(itemList.size) { itemList.get(it).toString() }
+                    val list = application.database.musicDao().getMusicByArtistsList(strList)
+                    this@DbSongListFragment.adapter.submitList(list)
+                }
+            }
+        }
+
+        navViewModel.selectedAlbumList.value.let { itemList ->
+            Log.i("wthtah",navViewModel.isFiltered.toString())
+            if (navViewModel.isFiltered && itemList!= null
+                && ( navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST
+                        || navViewModel.displayState==MusicFilterViewModel.DISPLAY_ALBUM_LIST_BY_ARTISTS)) {
+                lifecycleScope.launch(Dispatchers.IO) {
+                    val application = requireActivity().application as MusicApplication
+                    val strList = Array<String>(itemList.size) { itemList.get(it).toString() }
+                    val list = application.database.musicDao().getMusicByAlbumsList(strList)
+                    this@DbSongListFragment.adapter.submitList(list)
+                }
+            }
         }
     }
 

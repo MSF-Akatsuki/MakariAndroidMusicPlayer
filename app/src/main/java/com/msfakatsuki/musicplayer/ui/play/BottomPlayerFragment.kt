@@ -54,8 +54,11 @@ class BottomPlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        Glide.with(requireActivity()).load(getDrawable(requireActivity(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
 
+    }
+
+    override fun onStart() {
+        super.onStart()
         val serviceConnectionObserver = Observer<Boolean> {
             if (it) {
                 registerTransportControls()
@@ -71,27 +74,14 @@ class BottomPlayerFragment : Fragment() {
         viewModel.isServiceConnected.observe(viewLifecycleOwner, serviceConnectionObserver)
 
         viewModel.songDescription.observe(viewLifecycleOwner){ metadata ->
-            metadata?.let {
-                onMetadataChanged(metadata)
-            }
+            onMetadataChanged(metadata)
         }
 
-    }
-
-    override fun onStart() {
-        super.onStart()
-        viewModel.mediaBrowser.subscribe(
-            viewModel.mediaBrowser.root,
-            Bundle().apply {
-                putBoolean(MusicPlaybackService.HINT_IS_PLAYER,true)
-            },subscriptionBPCallback
-        )
+        onMetadataChanged(viewModel.songDescription.value)
     }
 
     override fun onStop() {
         super.onStop()
-        viewModel.mediaBrowser.unsubscribe(
-            viewModel.mediaBrowser.root)
     }
 
     override fun onAttach(context: Context) {
@@ -107,7 +97,6 @@ class BottomPlayerFragment : Fragment() {
         Log.println(Log.INFO,"mpuiF","onDestroyView")
         val mediaController = MediaControllerCompat.getMediaController(requireActivity())
         mediaController.unregisterCallback(controllerCallbacks)
-        viewModel.mediaBrowser.unsubscribe(viewModel.mediaBrowser.root)
     }
 
     private fun unregisterTransportControls() {
@@ -205,14 +194,14 @@ class BottomPlayerFragment : Fragment() {
                 binding.tvPlayUiArtist.text = shortenString( it.getString(MediaMetadataCompat.METADATA_KEY_ARTIST), 7)
                 binding.tvPlayUiTitle.text = shortenString(description.title.toString(), 10)
                 description.iconUri?.let {
-                    Glide.with(requireContext()).load(description.iconUri).into(binding.ivMediaIcon)
+                    Glide.with(requireActivity()).asBitmap().load(description.iconUri).into(binding.ivMediaIcon)
                 }?: kotlin.run {
                     mmr.setDataSource(requireContext(),description.mediaUri)
                     val pic = mmr.embeddedPicture?:ByteArray(0)
                     if (pic.isNotEmpty()) {
-                        Glide.with(requireContext()).load(pic).into(binding.ivMediaIcon)
+                        Glide.with(requireActivity()).load(pic).into(binding.ivMediaIcon)
                     } else {
-                        Glide.with(requireContext()).load(getDrawable(requireContext(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
+                        Glide.with(requireActivity()).load(getDrawable(requireActivity(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
                     }
                 }
 
@@ -220,6 +209,8 @@ class BottomPlayerFragment : Fragment() {
                 Log.e("mpuiFrag",e.message?:"NO MESSAGE")
             }
 
+        }?: kotlin.run{
+            Glide.with(requireActivity()).load(getDrawable(requireActivity(),R.drawable.uniform_noise)).into(binding.ivMediaIcon)
         }
     }
 

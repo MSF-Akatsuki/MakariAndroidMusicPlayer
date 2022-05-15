@@ -14,10 +14,8 @@ import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
 import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources.getDrawable
 import androidx.fragment.app.activityViewModels
@@ -87,6 +85,7 @@ class MusicPlayUIFragment : Fragment() {
 
     }
 
+
     override fun onDestroyView() {
         super.onDestroyView()
         Log.println(Log.INFO,"mpuiF","onDestroyView")
@@ -94,6 +93,8 @@ class MusicPlayUIFragment : Fragment() {
         mediaController.unregisterCallback(controllerCallbacks)
         viewModel.mediaBrowser.unsubscribe(viewModel.mediaBrowser.root)
     }
+
+
 
     private fun unregisterTransportControls() {
         binding.btnPlay.setOnClickListener(null)
